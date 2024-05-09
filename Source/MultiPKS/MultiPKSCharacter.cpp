@@ -9,6 +9,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "PickupComp.h"
 #include "Engine/LocalPlayer.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -40,15 +41,11 @@ AMultiPKSCharacter::AMultiPKSCharacter()
 
 void AMultiPKSCharacter::BeginPlay()
 {
-	// Call the base class  
 	Super::BeginPlay();
 }
 
-//////////////////////////////////////////////////////////////////////////// Input
-
 void AMultiPKSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {	
-	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		// Jumping
@@ -60,6 +57,9 @@ void AMultiPKSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMultiPKSCharacter::Look);
+		
+		//Interact
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AMultiPKSCharacter::Interact);
 	}
 	else
 	{
@@ -70,12 +70,10 @@ void AMultiPKSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void AMultiPKSCharacter::Move(const FInputActionValue& Value)
 {
-	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
 	{
-		// add movement 
 		AddMovementInput(GetActorForwardVector(), MovementVector.Y);
 		AddMovementInput(GetActorRightVector(), MovementVector.X);
 	}
@@ -83,13 +81,69 @@ void AMultiPKSCharacter::Move(const FInputActionValue& Value)
 
 void AMultiPKSCharacter::Look(const FInputActionValue& Value)
 {
-	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
 	{
-		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
+
+void AMultiPKSCharacter::Interact()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Interact Fired"));
+	FVector StartPoint = GetActorLocation(); 
+	FVector ForwardVector = GetActorForwardVector(); 
+	FVector EndPoint = StartPoint + ForwardVector * 1000.0f; 
+	FHitResult HitResult;
+	
+	FCollisionQueryParams QueryParams;
+	QueryParams.bTraceComplex = true;
+	QueryParams.AddIgnoredActor(this); 
+	
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		StartPoint,
+		EndPoint,
+		ECC_Visibility, 
+		QueryParams
+	);
+	
+	DrawDebugLine(GetWorld(), StartPoint, EndPoint, FColor::Red, false, 2.0f);
+
+	if (bHit && HitResult.GetActor())
+	{
+		UPickupComp* PickupComp = Cast<UPickupComp>(HitResult.GetActor()->GetComponentByClass(UPickupComp::StaticClass()));
+        
+		if (PickupComp)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Has Hit"));
+			if (HasAuthority()) 
+			{
+				PickupComp->AttachGun(this);
+			}
+			else
+			{
+				Server_Interact(PickupComp);
+			}
+		}
+	}
+}
+
+void AMultiPKSCharacter::Server_Interact_Implementation(UPickupComp* PickupComp)
+{
+	if(PickupComp)
+	{
+		PickupComp->AttachGun(this);
+	}
+}
+
+bool AMultiPKSCharacter::Server_Interact_Validate(UPickupComp* PickupComp)
+{
+	return true;
+}
+
+
+
+

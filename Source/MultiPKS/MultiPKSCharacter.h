@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PickupComp.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "MultiPKSCharacter.generated.h"
@@ -36,6 +37,9 @@ class AMultiPKSCharacter : public ACharacter
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputAction* InteractAction;
 	
 public:
 	AMultiPKSCharacter();
@@ -56,6 +60,13 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
+	void Interact();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Interact(UPickupComp* PickupComp);
+	bool Server_Interact_Validate(UPickupComp* PickupComp);
+	void Server_Interact_Implementation(UPickupComp* PickupComp);
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
@@ -68,4 +79,6 @@ public:
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
 };
+
+
 
