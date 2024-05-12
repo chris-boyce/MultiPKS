@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BaseMagazine.h"
+#include "Magazine.h"
 #include "MultiPKSCharacter.h"
 #include "GameFramework/Actor.h"
 #include "BasePistol.generated.h"
@@ -38,7 +38,10 @@ public:
 	void Fire();
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite , Category=Gameplay)
-	UBaseMagazine* Magazine;
+	TSubclassOf<AMagazine> MagazineClass;
+
+	UPROPERTY(VisibleAnywhere)
+	AMagazine* MagazineComponent;
 
 	UPROPERTY()
 	AMultiPKSCharacter* Character;

@@ -3,6 +3,7 @@
 
 #include "PickupComp.h"
 
+#include "BasePistol.h"
 #include "MultiPKSCharacter.h"
 #include "Components/SphereComponent.h"
 
@@ -32,7 +33,6 @@ void UPickupComp::AttachGun(AMultiPKSCharacter* Character)
 void UPickupComp::Server_AttachGun_Implementation(AMultiPKSCharacter* Character)
 {
 	Multi_AttachGun(Character);
-	UE_LOG(LogTemp, Warning, TEXT("Called Server"));
 }
 
 void UPickupComp::Multi_AttachGun_Implementation(AMultiPKSCharacter* Character)
@@ -44,9 +44,10 @@ void UPickupComp::Multi_AttachGun_Implementation(AMultiPKSCharacter* Character)
 	USphereComponent* SphereComp = Cast<USphereComponent>(GetOwner()->GetComponentByClass(USphereComponent::StaticClass()));
 	if (SphereComp)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Disabled Sphere Comp"));
 		SphereComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+	Cast<ABasePistol>(GetOwner())->Character = Character;
+	Character->WeaponInventory->GunInventory.Add(Cast<ABasePistol>(GetOwner()));
 }
 
 bool UPickupComp::Multi_AttachGun_Validate(AMultiPKSCharacter* Character)

@@ -15,6 +15,16 @@ ABasePistol::ABasePistol()
 void ABasePistol::BeginPlay()
 {
 	Super::BeginPlay();
+	if (MagazineClass)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		MagazineComponent = GetWorld()->SpawnActor<AMagazine>(MagazineClass, GetActorLocation(), GetActorRotation(), SpawnParams);
+		if (MagazineComponent)
+		{
+			MagazineComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+		}
+	}
 	
 }
 
@@ -27,34 +37,37 @@ void ABasePistol::Tick(float DeltaTime)
 
 void ABasePistol::Fire()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Runnning Fire"));
 	if (Character == nullptr || Character->GetController() == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Char"));
+		return;
+	}
+	if (ProjectileClass == nullptr)
 	{
 		return;
 	}
-	
-	if (ProjectileClass != nullptr)
+	UWorld* const World = GetWorld();
+	if (World == nullptr)
 	{
-		UWorld* const World = GetWorld();
-		if (World != nullptr)
-		{
-			APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
-			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-			const FVector SpawnLocation = GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
-			
-			if(!Character->HasAuthority())
-			{
-				Server_OnFire(SpawnLocation, SpawnRotation);
-			}
-			else
-			{
-				FActorSpawnParameters ActorSpawnParams;
-				ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-				
-				World->SpawnActor<AActor>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-			}
-			
-		}
+		return;
 	}
+	APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
+	const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+	const FVector SpawnLocation = Character->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
+			
+	if(!Character->HasAuthority())
+	{
+		Server_OnFire(SpawnLocation, SpawnRotation);
+	}
+	else
+	{
+		FActorSpawnParameters ActorSpawnParams;
+		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+				
+		World->SpawnActor<AActor>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+	}
+			
 	
 	if (FireSound != nullptr)
 	{

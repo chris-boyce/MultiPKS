@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "PickupComp.h"
+#include "PlayerWeaponInventory.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "MultiPKSCharacter.generated.h"
@@ -40,7 +41,10 @@ class AMultiPKSCharacter : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* InteractAction;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputAction*  FireAction;
+
 public:
 	AMultiPKSCharacter();
 
@@ -53,6 +57,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 
+	UPROPERTY(VisibleAnywhere)
+	UPlayerWeaponInventory* WeaponInventory;
+
 protected:
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -61,6 +68,15 @@ protected:
 	void Look(const FInputActionValue& Value);
 
 	void Interact();
+
+	void Fire();
+
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Fire(ABasePistol* BasePistol);
+	bool Server_Fire_Validate(ABasePistol* BasePistol);
+	void Server_Fire_Implementation(ABasePistol* BasePistol);
+	
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_Interact(UPickupComp* PickupComp);

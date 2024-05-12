@@ -1,6 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MultiPKSCharacter.h"
+
+#include "BasePistol.h"
 #include "MultiPKSProjectile.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
@@ -37,6 +39,9 @@ AMultiPKSCharacter::AMultiPKSCharacter()
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
+
+	WeaponInventory = CreateDefaultSubobject<UPlayerWeaponInventory>(TEXT("Weapon Inventory"));
+
 }
 
 void AMultiPKSCharacter::BeginPlay()
@@ -60,6 +65,9 @@ void AMultiPKSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		
 		//Interact
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AMultiPKSCharacter::Interact);
+
+		//Fire
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &AMultiPKSCharacter::Fire);
 	}
 	else
 	{
@@ -130,6 +138,35 @@ void AMultiPKSCharacter::Interact()
 		}
 	}
 }
+
+void AMultiPKSCharacter::Fire()
+{
+	if(!WeaponInventory->GunInventory.IsEmpty())
+	{
+		if(HasAuthority())
+		{
+			WeaponInventory->GunInventory[0]->Fire();
+		}
+		else
+		{
+			Server_Fire(WeaponInventory->GunInventory[0]);
+		}
+	}
+}
+
+void AMultiPKSCharacter::Server_Fire_Implementation(ABasePistol* BasePistol)
+{
+	if(BasePistol)
+	{
+		BasePistol->Fire();
+	}
+}
+
+bool AMultiPKSCharacter::Server_Fire_Validate(ABasePistol* BasePistol)
+{
+	return true;
+}
+
 
 void AMultiPKSCharacter::Server_Interact_Implementation(UPickupComp* PickupComp)
 {
