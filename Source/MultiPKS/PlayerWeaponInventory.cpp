@@ -28,3 +28,10 @@ void UPlayerWeaponInventory::TickComponent(float DeltaTime, ELevelTick TickType,
 	
 }
 
+void UPlayerWeaponInventory::AddWeaponToInventory(ABasePistol* Gun)
+{
+	GunInventory.Add(Gun);
+	OnUpdateInventory.Broadcast();
+	UE_LOG(LogTemp, Warning, TEXT("Has Added to Invetory and fired broadcast"));
+}
+

@@ -41,6 +41,8 @@ AMultiPKSCharacter::AMultiPKSCharacter()
 
 
 	WeaponInventory = CreateDefaultSubobject<UPlayerWeaponInventory>(TEXT("Weapon Inventory"));
+	WeaponInventory->OnUpdateInventory.AddDynamic(this, &AMultiPKSCharacter::HandleInventoryUpdate);
+	UE_LOG(LogTemp, Warning, TEXT("Has Bound The Inventory"));
 
 }
 
@@ -68,6 +70,9 @@ void AMultiPKSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		//Fire
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &AMultiPKSCharacter::Fire);
+
+		//Crouch
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &AMultiPKSCharacter::HandleCrouch);
 	}
 	else
 	{
@@ -154,12 +159,35 @@ void AMultiPKSCharacter::Fire()
 	}
 }
 
+void AMultiPKSCharacter::HandleCrouch()
+{
+	if(isCrouched)
+	{
+		UnCrouch();
+		isCrouched = false;
+	}
+	else
+	{
+		Crouch();
+		isCrouched = true;
+	}
+	
+	
+}
+
 void AMultiPKSCharacter::Server_Fire_Implementation(ABasePistol* BasePistol)
 {
 	if(BasePistol)
 	{
 		BasePistol->Fire();
 	}
+}
+
+void AMultiPKSCharacter::HandleInventoryUpdate()
+{
+	UE_LOG(LogTemp, Warning, TEXT("BroadCast Recieved Firing Blueprint"));
+	isArmed = true;
+	IsArmedUpdate();
 }
 
 bool AMultiPKSCharacter::Server_Fire_Validate(ABasePistol* BasePistol)

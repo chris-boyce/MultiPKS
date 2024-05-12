@@ -45,6 +45,9 @@ class AMultiPKSCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction*  FireAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputAction*  CrouchAction;
+
 public:
 	AMultiPKSCharacter();
 
@@ -70,6 +73,20 @@ protected:
 	void Interact();
 
 	void Fire();
+
+	void HandleCrouch();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool isCrouched = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool isArmed = false;
+
+	UFUNCTION()
+	void HandleInventoryUpdate();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void IsArmedUpdate();
 
 
 	UFUNCTION(Server, Reliable, WithValidation)

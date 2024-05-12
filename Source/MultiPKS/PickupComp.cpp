@@ -38,16 +38,23 @@ void UPickupComp::Server_AttachGun_Implementation(AMultiPKSCharacter* Character)
 void UPickupComp::Multi_AttachGun_Implementation(AMultiPKSCharacter* Character)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Called Multi"));
-	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	GetOwner()->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
-	Character->AddInstanceComponent(this);
-	USphereComponent* SphereComp = Cast<USphereComponent>(GetOwner()->GetComponentByClass(USphereComponent::StaticClass()));
-	if (SphereComp)
+	//FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+	//GetOwner()->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+	//Character->AddInstanceComponent(this);
+	//USphereComponent* SphereComp = Cast<USphereComponent>(GetOwner()->GetComponentByClass(USphereComponent::StaticClass()));
+	//if (SphereComp)
+	//{
+		//SphereComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//}
+	//Cast<ABasePistol>(GetOwner())->Character = Character;
+
+	if(Cast<ABasePistol>(GetOwner()))
 	{
-		SphereComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		UE_LOG(LogTemp, Warning, TEXT("Has Called Add Weapon To Inventory"));
+		Character->WeaponInventory->AddWeaponToInventory(Cast<ABasePistol>(GetOwner()));
+		
 	}
-	Cast<ABasePistol>(GetOwner())->Character = Character;
-	Character->WeaponInventory->GunInventory.Add(Cast<ABasePistol>(GetOwner()));
+	
 }
 
 bool UPickupComp::Multi_AttachGun_Validate(AMultiPKSCharacter* Character)
