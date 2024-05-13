@@ -23,13 +23,13 @@ public:
 	void AttachGun(AMultiPKSCharacter* Character);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_AttachGun(AMultiPKSCharacter* Character);
-	bool Server_AttachGun_Validate(AMultiPKSCharacter* Character);
-	void Server_AttachGun_Implementation(AMultiPKSCharacter* Character);
+	void Server_AttachGun(AMultiPKSCharacter* InteractingCharacter);
+	bool Server_AttachGun_Validate(AMultiPKSCharacter* InteractingCharacter);
+	void Server_AttachGun_Implementation(AMultiPKSCharacter* InteractingCharacter);
 
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
-	void Multi_AttachGun(AMultiPKSCharacter* Character);
-	bool Multi_AttachGun_Validate(AMultiPKSCharacter* Character);
-	void Multi_AttachGun_Implementation(AMultiPKSCharacter* Character);
+	void Multi_AttachGun(AMultiPKSCharacter* InteractingCharacter);
+	bool Multi_AttachGun_Validate(AMultiPKSCharacter* InteractingCharacter);
+	void Multi_AttachGun_Implementation(AMultiPKSCharacter* InteractingCharacter);
 		
 };

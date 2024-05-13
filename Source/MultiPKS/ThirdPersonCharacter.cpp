@@ -2,9 +2,9 @@
 
 
 #include "ThirdPersonCharacter.h"
-
 #include "EnhancedInputComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Old Content/InteractComp.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 AThirdPersonCharacter::AThirdPersonCharacter()
@@ -35,7 +35,7 @@ void AThirdPersonCharacter::Look(const FInputActionValue& Value)
 
 void AThirdPersonCharacter::HandleInteract()
 {
-	UE_LOG(LogTemp, Log, TEXT("Interact"));
+	InteractComponent->InteractWithObject();
 }
 
 void AThirdPersonCharacter::HandleFire()
@@ -60,17 +60,17 @@ void AThirdPersonCharacter::HandleCrouch()
 void AThirdPersonCharacter::HandleADS()
 {
 	UCharacterMovementComponent* CharMovementComp = GetCharacterMovement();
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if(isADSed)
 	{
-		CharMovementComp->MaxWalkSpeed = 500.0f;
+		ChangeMoveSpeed(500.0f);
 		MainCamera->SetActive(true);
 		ADSCamera->SetActive(false);
 		isADSed = false;
 	}
 	else
 	{
-		
-		CharMovementComp->MaxWalkSpeed = 200.0f;
+		ChangeMoveSpeed(200.0f);
 		ADSCamera->SetActive(true);
 		MainCamera->SetActive(false);
 		isADSed = true;
@@ -105,8 +105,43 @@ void AThirdPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+		//UE_LOG(LogTemp, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 
 }
+
+void AThirdPersonCharacter::ChangeMoveSpeed(float MoveSpeed)
+{
+	if(HasAuthority())
+	{
+		Multi_MoveSpeed(MoveSpeed);
+	}
+	else
+	{
+		Server_MoveSpeed(MoveSpeed);
+	}
+}
+
+void AThirdPersonCharacter::Multi_MoveSpeed_Implementation(float Speed)
+{
+	UCharacterMovementComponent* CharMovementComp = GetCharacterMovement();
+	CharMovementComp->MaxWalkSpeed = Speed;
+}
+
+bool AThirdPersonCharacter::Multi_MoveSpeed_Validate(float Speed)
+{
+	return true;
+}
+
+void AThirdPersonCharacter::Server_MoveSpeed_Implementation(float Speed)
+{
+	Multi_MoveSpeed(Speed);
+}
+
+bool AThirdPersonCharacter::Server_MoveSpeed_Validate(float Speed)
+{
+	return true;
+}
+
+
 

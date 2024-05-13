@@ -5,11 +5,13 @@
 #include "CoreMinimal.h"
 #include "Magazine.h"
 #include "MultiPKSCharacter.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
+#include "MultiPKS/Pickupable.h"
 #include "BasePistol.generated.h"
 
 UCLASS()
-class MULTIPKS_API ABasePistol : public AActor
+class MULTIPKS_API ABasePistol : public AActor , public IPickupable
 {
 	GENERATED_BODY()
 	
@@ -21,6 +23,12 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void HighlightObject() override;
+
+	virtual void UnHighlightObject() override;
+
+	virtual ABasePistol* PickupObject(AThirdPersonCharacter* InteractingCharacter) override;
 	
 	UPROPERTY(EditAnywhere, Category=Projectile)
 	TSubclassOf<AActor> ProjectileClass;
@@ -43,9 +51,18 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	AMagazine* MagazineComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USphereComponent* SphereComponentZ;
+
 	UPROPERTY()
 	AMultiPKSCharacter* Character;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnableOutline();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void DisableOutline();
+	
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_OnFire(FVector Location, FRotator Rotation);
 	bool Server_OnFire_Validate(FVector Location, FRotator Rotation);

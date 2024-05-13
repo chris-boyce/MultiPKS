@@ -4,11 +4,13 @@
 #include "BasePistol.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "MultiPKS/ThirdPersonCharacter.h"
 
 
 ABasePistol::ABasePistol()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	SetReplicates(true);
 }
 
 
@@ -28,11 +30,25 @@ void ABasePistol::BeginPlay()
 	
 }
 
-
 void ABasePistol::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ABasePistol::HighlightObject()
+{
+	EnableOutline();
+}
+
+void ABasePistol::UnHighlightObject()
+{
+	DisableOutline();
+}
+
+ABasePistol* ABasePistol::PickupObject(AThirdPersonCharacter* InteractingCharacter)
+{
+	return this;
 }
 
 void ABasePistol::Fire()
@@ -85,6 +101,7 @@ void ABasePistol::Fire()
 		}
 	}
 }
+
 
 bool ABasePistol::Server_OnFire_Validate(FVector Location, FRotator Rotation)
 {

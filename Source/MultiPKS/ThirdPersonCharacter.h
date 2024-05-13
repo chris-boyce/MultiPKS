@@ -9,6 +9,16 @@
 struct FInputActionValue;
 class UInputAction;
 class UCameraComponent;
+class UInteractComp;
+
+UENUM(BlueprintType)  
+enum class EWeaponType : uint8
+{
+	Rifle,
+	Pistol,
+	None 
+};
+
 UCLASS()
 class MULTIPKS_API AThirdPersonCharacter : public ACharacter
 {
@@ -81,4 +91,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|Cameras")
 	UCameraComponent* ADSCamera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|InteractComp")
+	UInteractComp* InteractComponent;
+
+	UFUNCTION()
+	void ChangeMoveSpeed(float MoveSpeed);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_MoveSpeed(float Speed);
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void Multi_MoveSpeed(float Speed);
+
+	
 };
