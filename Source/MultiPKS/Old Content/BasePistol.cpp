@@ -12,20 +12,29 @@ ABasePistol::ABasePistol()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
+void ABasePistol::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	if (MagazineClasses.Num() > 0 && EditMode == false)
+	{
+		int32 RandomIndex = FMath::RandRange(0, MagazineClasses.Num() - 1);
+		TSubclassOf<AMagazine> SelectedMagazineClass = MagazineClasses[RandomIndex];
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		if(MagazineComponent)
+		{
+			MagazineComponent->Destroy();
+		}
+		MagazineComponent = GetWorld()->SpawnActor<AMagazine>(SelectedMagazineClass, GetActorLocation(), GetActorRotation(), SpawnParams);
+		MagazineComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+	}
+}
+
 
 void ABasePistol::BeginPlay()
 {
 	Super::BeginPlay();
-	if (MagazineClass)
-	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
-		MagazineComponent = GetWorld()->SpawnActor<AMagazine>(MagazineClass, GetActorLocation(), GetActorRotation(), SpawnParams);
-		if (MagazineComponent)
-		{
-			MagazineComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-		}
-	}
+	
 	
 }
 
@@ -55,12 +64,11 @@ void ABasePistol::FireDown(AThirdPersonCharacter* Char)
 	SetOwner(Char);
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *GetOwner()->GetName());
 	Fire(Char);
-	//GetWorld()->GetTimerManager().SetTimer(FiringTimerHandle, this, &ABasePistol::Fire, 0.2f, true);
 }
 
 void ABasePistol::FireUp()
 {
-	//GetWorld()->GetTimerManager().ClearTimer(FiringTimerHandle);
+
 }
 
 void ABasePistol::Fire(AThirdPersonCharacter* FiringCharacter)
@@ -71,13 +79,18 @@ void ABasePistol::Fire(AThirdPersonCharacter* FiringCharacter)
 		UE_LOG(LogTemp, Warning, TEXT("Proj Class"));
 		return;
 	}
-	UWorld* const World = GetWorld();
-	if (World == nullptr)
+	if(MagazineComponent->CurrentAmmo <= 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No world"));
+		MagazineComponent->ReloadMag();
 		return;
 	}
+	
 	UE_LOG(LogTemp, Warning, TEXT("Passed Fire Function Tests"));
+
+	MagazineComponent->ConsumeAmmo();
+
+	UE_LOG(LogTemp, Log, TEXT("Current Ammo: %d"), MagazineComponent->CurrentAmmo);
+	
 
 	APlayerController* PlayerController = Cast<APlayerController>(FiringCharacter->GetController());
 	FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
@@ -86,14 +99,28 @@ void ABasePistol::Fire(AThirdPersonCharacter* FiringCharacter)
 	FActorSpawnParameters ActorSpawnParams;
 	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnLocation , SpawnRotation , ActorSpawnParams);
+	Multi_FireSound(SpawnLocation);
 	
-	if (FireSound != nullptr)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, FiringCharacter->GetActorLocation());
-	}
 	
 	
 }
+
+void ABasePistol::Multi_FireSound_Implementation(FVector Location)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Entered Sound Function"));
+	if (FireSound != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Playing Sound"));
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, Location);
+	}
+}
+
+bool ABasePistol::Multi_FireSound_Validate(FVector Location)
+{
+	return true;
+}
+
+
 
 
 

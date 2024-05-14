@@ -18,6 +18,8 @@ class MULTIPKS_API ABasePistol : public AActor , public IPickupable
 public:	
 	ABasePistol();
 
+	virtual void OnConstruction(const FTransform& Transform) override;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -51,8 +53,14 @@ public:
 	UFUNCTION()
 	void Fire(AThirdPersonCharacter* Char);
 
-	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite , Category=Gameplay)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite , Category=Gameplay)
 	TSubclassOf<AMagazine> MagazineClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	TArray<TSubclassOf<AMagazine>> MagazineClasses;
+
+	UPROPERTY(EditDefaultsOnly)
+	bool EditMode = false;
 
 	FTimerHandle FiringTimerHandle;
 
@@ -67,4 +75,8 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void DisableOutline();
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void Multi_FireSound(FVector Location);
+	
 };
