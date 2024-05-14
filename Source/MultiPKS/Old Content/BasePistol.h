@@ -43,28 +43,28 @@ public:
 	FVector MuzzleOffset;
 
 	UFUNCTION(BlueprintCallable, Category="Weapon")
-	void Fire();
+	void FireDown(AThirdPersonCharacter* Char);
+
+	UFUNCTION()
+	void FireUp();
+
+	UFUNCTION()
+	void Fire(AThirdPersonCharacter* Char);
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite , Category=Gameplay)
 	TSubclassOf<AMagazine> MagazineClass;
+
+	FTimerHandle FiringTimerHandle;
 
 	UPROPERTY(VisibleAnywhere)
 	AMagazine* MagazineComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USphereComponent* SphereComponentZ;
-
-	UPROPERTY()
-	AMultiPKSCharacter* Character;
-
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void EnableOutline();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void DisableOutline();
-	
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_OnFire(FVector Location, FRotator Rotation);
-	bool Server_OnFire_Validate(FVector Location, FRotator Rotation);
-	void Server_OnFire_Implementation(FVector Location, FRotator Rotation);
 };

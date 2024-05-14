@@ -127,6 +127,9 @@ public:
 	void ChangeMoveSpeed(float MoveSpeed);
 
 	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Fire(ABasePistol* Gun);
+
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_MoveSpeed(float Speed);
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void Multi_MoveSpeed(float Speed);

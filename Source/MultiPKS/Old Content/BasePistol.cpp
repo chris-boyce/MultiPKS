@@ -10,7 +10,6 @@
 ABasePistol::ABasePistol()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	SetReplicates(true);
 }
 
 
@@ -51,68 +50,53 @@ ABasePistol* ABasePistol::PickupObject(AThirdPersonCharacter* InteractingCharact
 	return this;
 }
 
-void ABasePistol::Fire()
+void ABasePistol::FireDown(AThirdPersonCharacter* Char)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Runnning Fire"));
-	if (Character == nullptr || Character->GetController() == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No Char"));
-		return;
-	}
+	SetOwner(Char);
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *GetOwner()->GetName());
+	Fire(Char);
+	//GetWorld()->GetTimerManager().SetTimer(FiringTimerHandle, this, &ABasePistol::Fire, 0.2f, true);
+}
+
+void ABasePistol::FireUp()
+{
+	//GetWorld()->GetTimerManager().ClearTimer(FiringTimerHandle);
+}
+
+void ABasePistol::Fire(AThirdPersonCharacter* FiringCharacter)
+{
+	SetOwner(FiringCharacter);
 	if (ProjectileClass == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Proj Class"));
 		return;
 	}
 	UWorld* const World = GetWorld();
 	if (World == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("No world"));
 		return;
 	}
-	APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
-	const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-	const FVector SpawnLocation = Character->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
-			
-	if(!Character->HasAuthority())
-	{
-		Server_OnFire(SpawnLocation, SpawnRotation);
-	}
-	else
-	{
-		FActorSpawnParameters ActorSpawnParams;
-		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-				
-		World->SpawnActor<AActor>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-	}
-			
+	UE_LOG(LogTemp, Warning, TEXT("Passed Fire Function Tests"));
+
+	APlayerController* PlayerController = Cast<APlayerController>(FiringCharacter->GetController());
+	FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+	FVector SpawnLocation = FiringCharacter->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
+
+	FActorSpawnParameters ActorSpawnParams;
+	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnLocation , SpawnRotation , ActorSpawnParams);
 	
 	if (FireSound != nullptr)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, FiringCharacter->GetActorLocation());
 	}
 	
-
-	if (FireAnimation != nullptr)
-	{
-
-		UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
-		if (AnimInstance != nullptr)
-		{
-			AnimInstance->Montage_Play(FireAnimation, 1.f);
-		}
-	}
+	
 }
 
 
-bool ABasePistol::Server_OnFire_Validate(FVector Location, FRotator Rotation)
-{
-	return true;
-}
 
-void ABasePistol::Server_OnFire_Implementation(FVector Location, FRotator Rotation)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Firing On Server"));
-	FActorSpawnParameters ActorSpawnParams;
-	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, Location, Rotation, ActorSpawnParams);
-}
+
+
 

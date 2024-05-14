@@ -150,7 +150,7 @@ void AMultiPKSCharacter::Fire()
 	{
 		if(HasAuthority())
 		{
-			WeaponInventory->GunInventory[0]->Fire();
+			//WeaponInventory->GunInventory[0]->Fire();
 		}
 		else
 		{
@@ -179,7 +179,7 @@ void AMultiPKSCharacter::Server_Fire_Implementation(ABasePistol* BasePistol)
 {
 	if(BasePistol)
 	{
-		BasePistol->Fire();
+		//BasePistol->Fire();
 	}
 }
 

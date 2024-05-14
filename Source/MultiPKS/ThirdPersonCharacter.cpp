@@ -50,12 +50,29 @@ void AThirdPersonCharacter::HandleInteract()
 
 void AThirdPersonCharacter::HandleFireDown()
 {
-	UE_LOG(LogTemp, Log, TEXT("FireDown"));
+	if(!PlayerWeapon.IsEmpty())
+	{
+		if(HasAuthority())
+		{
+			PlayerWeapon[CurrentlySelectedWeapon]->Fire(this);
+		}
+		else
+		{
+			Server_Fire(PlayerWeapon[CurrentlySelectedWeapon]);
+		}
+		
+	}
+	
 }
 
 void AThirdPersonCharacter::HandleFireUp()
 {
-	UE_LOG(LogTemp, Warning, TEXT("FireUp"));
+	UE_LOG(LogTemp, Warning, TEXT("Fire Up"));
+	if(!PlayerWeapon.IsEmpty())
+	{
+		PlayerWeapon[CurrentlySelectedWeapon]->FireUp();
+	}
+	
 }
 
 
@@ -141,7 +158,7 @@ void AThirdPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 		//Fire
 		EnhancedInputComponent->BindAction(FireDownAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleFireDown);
-		EnhancedInputComponent->BindAction(FireDownAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleFireUp);
+		EnhancedInputComponent->BindAction(FireUpAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleFireUp);
 
 		//Crouch
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleCrouch);
@@ -171,6 +188,16 @@ void AThirdPersonCharacter::ChangeMoveSpeed(float MoveSpeed)
 	{
 		Server_MoveSpeed(MoveSpeed);
 	}
+}
+
+void AThirdPersonCharacter::Server_Fire_Implementation(ABasePistol* Gun)
+{
+	PlayerWeapon[CurrentlySelectedWeapon]->Fire(this);
+}
+
+bool AThirdPersonCharacter::Server_Fire_Validate(ABasePistol* Gun)
+{
+	return true;
 }
 
 void AThirdPersonCharacter::Server_ChangeSelectedWeapon_Implementation(int Num)
