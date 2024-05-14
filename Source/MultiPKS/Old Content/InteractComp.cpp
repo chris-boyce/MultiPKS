@@ -42,6 +42,7 @@ void UInteractComp::InteractWithObject()
 				if(Gun)
 				{
 					UE_LOG(LogTemp, Warning, TEXT("Has Got Reference To Gun"));
+					
 					if(GetOwner()->HasAuthority())
 					{
 						Multi_AttachGun(Gun);
@@ -50,6 +51,7 @@ void UInteractComp::InteractWithObject()
 					{
 						Server_AttachGun(Gun);
 					}
+					
 				}
 			}
 		}
@@ -71,6 +73,18 @@ void UInteractComp::Multi_AttachGun_Implementation(ABasePistol* Gun)
 {
 	Gun->AttachToComponent(Cast<AThirdPersonCharacter>(GetOwner())->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("GunSocket"));
 	Gun->SphereComponentZ->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	auto Owner = Cast<AThirdPersonCharacter>(GetOwner());
+	if(Owner->PlayerWeapon.Num() <= 1)
+	{
+		Owner->PlayerWeapon.Add(Gun);
+	}
+	else
+	{
+		DropWeapon.Broadcast(Cast<AThirdPersonCharacter>(GetOwner()));
+		UE_LOG(LogTemp, Warning, TEXT("Fired BroadCast"));
+		Owner->PlayerWeapon[Owner->CurrentlySelectedWeapon] = Gun;
+	}
+	
 }
 
 bool UInteractComp::Multi_AttachGun_Validate(ABasePistol* Gun)

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Old Content/BasePistol.h"
 #include "ThirdPersonCharacter.generated.h"
 
 struct FInputActionValue;
@@ -42,7 +43,10 @@ private:
 	UInputAction* InteractAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	UInputAction*  FireAction;
+	UInputAction*  FireDownAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputAction*  FireUpAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction*  CrouchAction;
@@ -52,6 +56,15 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ADSAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* FirstWeaponAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SecondWeaponAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DropWeaponAction;
 	
 	void Move(const FInputActionValue& Value);
 	
@@ -59,13 +72,19 @@ private:
 
 	void HandleInteract();
 
-	void HandleFire();
+	void HandleFireDown();
+
+	void HandleFireUp();
 
 	void HandleCrouch();
 
 	void HandleADS();
 
-	
+	void HandleFirstWeaponSwap(){SetCurrentSelectedWeapon(0); UE_LOG(LogTemp, Warning, TEXT("Currently Gun 0")); HideWeapons();}
+
+	void HandleSecondWeaponSwap(){SetCurrentSelectedWeapon(1);UE_LOG(LogTemp, Warning, TEXT("Currently Gun 1")); HideWeapons();}
+
+	void HideWeapons();
 
 public:
 	USkeletalMeshComponent* GetPlayerMesh() const { return ThirdPersonPlayerMesh; }
@@ -95,14 +114,40 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|InteractComp")
 	UInteractComp* InteractComponent;
 
+	UPROPERTY(VisibleAnywhere)
+	TArray<ABasePistol*> PlayerWeapon;
+
+	UPROPERTY()
+	int CurrentlySelectedWeapon = 0;
+
+	UFUNCTION()
+	void HandleDropWeapon(AThirdPersonCharacter* PlayerDropping);
+	
 	UFUNCTION()
 	void ChangeMoveSpeed(float MoveSpeed);
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_MoveSpeed(float Speed);
-
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void Multi_MoveSpeed(float Speed);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_DropWeapon(ABasePistol* DropWeapon);
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void Multi_DropWeapon(ABasePistol* DropWeapon);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SwitchWeapon(AThirdPersonCharacter* Character);
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void Multi_SwitchWeapon(AThirdPersonCharacter* Character);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_ChangeSelectedWeapon(int Num);
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void Multi_ChangeSelectedWeapon(int Num);
+
+	UFUNCTION()
+	void SetCurrentSelectedWeapon(int Num);
 
 	
 };

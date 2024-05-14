@@ -7,6 +7,7 @@
 #include "Components/ActorComponent.h"
 #include "InteractComp.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDropWeapon, AThirdPersonCharacter*, Player);
 
 class IPickupable;
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -24,6 +25,8 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void Multi_AttachGun(ABasePistol* Gun);
+
+	FDropWeapon DropWeapon;
 
 protected:
 	

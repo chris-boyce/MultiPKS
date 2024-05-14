@@ -17,6 +17,16 @@ void AThirdPersonCharacter::BeginPlay()
 	Super::BeginPlay();
 	MainCamera->SetActive(true);
 	ADSCamera->SetActive(false);
+	if(InteractComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Has Bound Drop"));
+		InteractComponent->DropWeapon.AddDynamic(this, &AThirdPersonCharacter::HandleDropWeapon);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Has NOT Bound Drop"));
+	}
+	
 }
 
 void AThirdPersonCharacter::Move(const FInputActionValue& Value)
@@ -38,10 +48,16 @@ void AThirdPersonCharacter::HandleInteract()
 	InteractComponent->InteractWithObject();
 }
 
-void AThirdPersonCharacter::HandleFire()
+void AThirdPersonCharacter::HandleFireDown()
 {
-	UE_LOG(LogTemp, Log, TEXT("Fire"));
+	UE_LOG(LogTemp, Log, TEXT("FireDown"));
 }
+
+void AThirdPersonCharacter::HandleFireUp()
+{
+	UE_LOG(LogTemp, Warning, TEXT("FireUp"));
+}
+
 
 void AThirdPersonCharacter::HandleCrouch()
 {
@@ -77,6 +93,34 @@ void AThirdPersonCharacter::HandleADS()
 	}
 }
 
+void AThirdPersonCharacter::HideWeapons()
+{
+	if(HasAuthority())
+	{
+		Multi_SwitchWeapon(this);
+	}
+	else
+	{
+		Server_SwitchWeapon(this);
+	}
+}
+
+void AThirdPersonCharacter::HandleDropWeapon(AThirdPersonCharacter* PlayerDropping)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Character Name: %s"), *PlayerDropping->GetName());
+	UE_LOG(LogTemp, Warning, TEXT("Recieved Broadcast"));
+	if(HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Has Authority"));
+		Multi_DropWeapon(PlayerWeapon[CurrentlySelectedWeapon]);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Doesnt Have Aothorirty"));
+		Server_DropWeapon(PlayerWeapon[CurrentlySelectedWeapon]);
+	}
+}
+
 void AThirdPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -96,12 +140,19 @@ void AThirdPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleInteract);
 
 		//Fire
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleFire);
+		EnhancedInputComponent->BindAction(FireDownAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleFireDown);
+		EnhancedInputComponent->BindAction(FireDownAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleFireUp);
 
 		//Crouch
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleCrouch);
 
 		EnhancedInputComponent->BindAction(ADSAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleADS);
+
+		//EnhancedInputComponent->BindAction(DropWeaponAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleDropWeapon);
+
+		EnhancedInputComponent->BindAction(FirstWeaponAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleFirstWeaponSwap);
+
+		EnhancedInputComponent->BindAction(SecondWeaponAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleSecondWeaponSwap);
 	}
 	else
 	{
@@ -120,6 +171,88 @@ void AThirdPersonCharacter::ChangeMoveSpeed(float MoveSpeed)
 	{
 		Server_MoveSpeed(MoveSpeed);
 	}
+}
+
+void AThirdPersonCharacter::Server_ChangeSelectedWeapon_Implementation(int Num)
+{
+	Multi_ChangeSelectedWeapon(Num);
+}
+
+bool AThirdPersonCharacter::Server_ChangeSelectedWeapon_Validate(int Num)
+{
+	return true;
+}
+
+void AThirdPersonCharacter::Multi_ChangeSelectedWeapon_Implementation(int Num)
+{
+	CurrentlySelectedWeapon = Num;
+}
+
+bool AThirdPersonCharacter::Multi_ChangeSelectedWeapon_Validate(int Num)
+{
+	return true;
+}
+
+void AThirdPersonCharacter::SetCurrentSelectedWeapon(int Num)
+{
+	if(HasAuthority())
+	{
+		Multi_ChangeSelectedWeapon(Num);
+	}
+	else
+	{
+		Server_ChangeSelectedWeapon(Num);
+	}
+}
+
+void AThirdPersonCharacter::Multi_SwitchWeapon_Implementation(AThirdPersonCharacter* Character)
+{
+	for (ABasePistol* Weapon : Character->PlayerWeapon)
+	{
+		if (Weapon)
+		{
+			Weapon->SetActorHiddenInGame(true);
+		}
+	}
+	Character->PlayerWeapon[CurrentlySelectedWeapon]->SetActorHiddenInGame(false);
+}
+
+bool AThirdPersonCharacter::Multi_SwitchWeapon_Validate(AThirdPersonCharacter* Character)
+{
+	return true;
+}
+
+void AThirdPersonCharacter::Server_SwitchWeapon_Implementation(AThirdPersonCharacter* Character)
+{
+	Multi_SwitchWeapon(Character);
+}
+
+bool AThirdPersonCharacter::Server_SwitchWeapon_Validate(AThirdPersonCharacter* Character)
+{
+	return true;
+}
+
+void AThirdPersonCharacter::Multi_DropWeapon_Implementation(ABasePistol* DropWeapon)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Fired Multi"));
+	DropWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	DropWeapon->SphereComponentZ->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+}
+
+bool AThirdPersonCharacter::Multi_DropWeapon_Validate(ABasePistol* DropWeapon)
+{
+	return true;
+}
+
+void AThirdPersonCharacter::Server_DropWeapon_Implementation(ABasePistol* DropWeapon)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Fired Server"));
+	Multi_DropWeapon(DropWeapon);
+}
+
+bool AThirdPersonCharacter::Server_DropWeapon_Validate(ABasePistol* DropWeapon)
+{
+	return true;
 }
 
 void AThirdPersonCharacter::Multi_MoveSpeed_Implementation(float Speed)
