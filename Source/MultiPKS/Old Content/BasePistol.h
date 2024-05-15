@@ -6,8 +6,10 @@
 #include "Magazine.h"
 #include "MultiPKSCharacter.h"
 #include "Components/SphereComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/Actor.h"
 #include "MultiPKS/Pickupable.h"
+#include "MultiPKS/WeaponDisplay.h"
 #include "BasePistol.generated.h"
 
 UCLASS()
@@ -26,11 +28,22 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void HighlightObject() override;
+	virtual void HighlightObject(AThirdPersonCharacter* InteractingCharacter) override;
 
-	virtual void UnHighlightObject() override;
+	UFUNCTION(BlueprintCallable)
+	virtual void UnHighlightObject(AThirdPersonCharacter* InteractingCharacter) override;
 
 	virtual ABasePistol* PickupObject(AThirdPersonCharacter* InteractingCharacter) override;
+
+	void SetMagDisplay();
+
+	bool WeaponDisplayOnScreen = false;
+
+	UPROPERTY()
+	UUserWidget* WeaponDisplayWidget;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Widget")
+	TSubclassOf<UWeaponDisplay> WeaponDisplay;
 	
 	UPROPERTY(EditAnywhere, Category=Projectile)
 	TSubclassOf<AActor> ProjectileClass;

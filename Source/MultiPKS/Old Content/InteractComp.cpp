@@ -35,23 +35,28 @@ void UInteractComp::InteractWithObject()
 		if (bHit)
 		{
 			//DrawDebugLine(GetWorld(), StartLocation, HitResult.Location, FColor::Red, false, 1.0f, 0, 1.0f);
-			IPickupable* Pickupable = Cast<IPickupable>(HitResult.GetActor());
-			if (Pickupable)
+			CurrentPickupable = Cast<IPickupable>(HitResult.GetActor());
+			if (CurrentPickupable)
 			{
-				auto Gun = Pickupable->PickupObject(Cast<AThirdPersonCharacter>(GetOwner()));
-				if(Gun)
+				auto gun  = CurrentPickupable->PickupObject(Cast<AThirdPersonCharacter>(GetOwner()));
+				if(gun)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Has Got Reference To Gun"));
+					UE_LOG(LogTemp, Warning, TEXT("Has Gun At Server Check: %s"), *gun->GetName());
 					
 					if(GetOwner()->HasAuthority())
 					{
-						Multi_AttachGun(Gun);
+						Multi_AttachGun(gun);
 					}
 					else
 					{
-						Server_AttachGun(Gun);
+						Server_AttachGun(gun);
 					}
 					
+				}
+				else
+				{
+					
+					UE_LOG(LogTemp, Warning, TEXT("Gun is nullptr after PickupObject call"));
 				}
 			}
 		}
@@ -60,6 +65,7 @@ void UInteractComp::InteractWithObject()
 
 void UInteractComp::Server_AttachGun_Implementation(ABasePistol* Gun)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Has Gun At server pass throough: %s"), *Gun->GetName());
 	Multi_AttachGun(Gun);
 }
 
@@ -71,11 +77,14 @@ bool UInteractComp::Server_AttachGun_Validate(ABasePistol* Gun)
 
 void UInteractComp::Multi_AttachGun_Implementation(ABasePistol* Gun)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Has Gun At Multi Check: %s"), *Gun->GetName());
+	
 	Gun->AttachToComponent(Cast<AThirdPersonCharacter>(GetOwner())->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("GunSocket"));
 	Gun->SphereComponentZ->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	auto Owner = Cast<AThirdPersonCharacter>(GetOwner());
 	if(Owner->PlayerWeapon.Num() <= 1)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Adding Weapon To PLayer List"));
 		Owner->PlayerWeapon.Add(Gun);
 	}
 	else
@@ -114,11 +123,30 @@ void UInteractComp::PerformLineTrace()
 		if (bHit)
 		{
 			//DrawDebugLine(GetWorld(), StartLocation, HitResult.Location, FColor::Red, false, 1.0f, 0, 1.0f);
-			IPickupable* Pickupable = Cast<IPickupable>(HitResult.GetActor());
-			if (Pickupable)
+			SavedPickupable = Cast<IPickupable>(HitResult.GetActor());
+			if (SavedPickupable)
 			{
-				Pickupable->HighlightObject();
+				SavedPickupable->HighlightObject(Cast<AThirdPersonCharacter>(GetOwner()));
 			}
+			else
+			{
+				if(SavedPickupable)
+				{
+					SavedPickupable->UnHighlightObject(Cast<AThirdPersonCharacter>(GetOwner()));
+					SavedPickupable  = nullptr;
+				}
+				
+			}
+			
+		}
+		else
+		{
+			if(SavedPickupable)
+			{
+				SavedPickupable->UnHighlightObject(Cast<AThirdPersonCharacter>(GetOwner()));
+				SavedPickupable  = nullptr;
+			}
+			
 		}
 	}
 }

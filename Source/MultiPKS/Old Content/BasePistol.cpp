@@ -5,6 +5,7 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "MultiPKS/ThirdPersonCharacter.h"
+#include "MultiPKS/WeaponDisplay.h"
 
 
 ABasePistol::ABasePistol()
@@ -27,6 +28,7 @@ void ABasePistol::OnConstruction(const FTransform& Transform)
 		}
 		MagazineComponent = GetWorld()->SpawnActor<AMagazine>(SelectedMagazineClass, GetActorLocation(), GetActorRotation(), SpawnParams);
 		MagazineComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+		
 	}
 }
 
@@ -34,6 +36,7 @@ void ABasePistol::OnConstruction(const FTransform& Transform)
 void ABasePistol::BeginPlay()
 {
 	Super::BeginPlay();
+	//SetMagDisplay();
 	
 	
 }
@@ -44,19 +47,54 @@ void ABasePistol::Tick(float DeltaTime)
 
 }
 
-void ABasePistol::HighlightObject()
+void ABasePistol::HighlightObject(AThirdPersonCharacter* InteractingCharacter)
 {
 	EnableOutline();
+	if(WeaponDisplayOnScreen)
+	{
+		return;
+	}
+	
+	if (InteractingCharacter)
+	{
+		APlayerController* PC = Cast<APlayerController>(InteractingCharacter->GetController());
+		if (PC && WeaponDisplay)  
+		{
+
+			WeaponDisplayWidget = CreateWidget<UUserWidget>(PC, WeaponDisplay);
+
+			if (WeaponDisplayWidget)
+			{
+				WeaponDisplayWidget->AddToViewport();
+				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_MagDisplay->SetAllText(MagazineComponent->GetName(), FString("TBA"), MagazineComponent->MaxAmmo, MagazineComponent->ReloadSpeed, FString("TBA"), MagazineComponent->ElementalPercentageChance, MagazineComponent->ElementalEffectTime );
+				WeaponDisplayOnScreen = true;
+			}
+		}
+	}
 }
 
-void ABasePistol::UnHighlightObject()
+void ABasePistol::UnHighlightObject(AThirdPersonCharacter* InteractingCharacter)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Removing Widget"));
 	DisableOutline();
+	WeaponDisplayWidget->RemoveFromParent();
+	WeaponDisplayWidget = nullptr;
+	WeaponDisplayOnScreen = false;
 }
 
 ABasePistol* ABasePistol::PickupObject(AThirdPersonCharacter* InteractingCharacter)
 {
+	if(!InteractingCharacter->GetPlayerAmmoHUD()->IsInViewport())
+	{
+		InteractingCharacter->GetPlayerAmmoHUD()->AddToViewport();
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Gun being returned: %s"), *this->GetName());
 	return this;
+}
+
+void ABasePistol::SetMagDisplay()
+{
+	
 }
 
 void ABasePistol::FireDown(AThirdPersonCharacter* Char)

@@ -15,6 +15,16 @@ AThirdPersonCharacter::AThirdPersonCharacter()
 void AThirdPersonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if(PlayerAmmoHUDClass && PC)
+	{
+		PlayerAmmoHUD = CreateWidget<UPlayerAmmoHUD>(PC, PlayerAmmoHUDClass);
+	}
+	
+	
+	
+	
+	
 	MainCamera->SetActive(true);
 	ADSCamera->SetActive(false);
 	if(InteractComponent)
@@ -46,6 +56,7 @@ void AThirdPersonCharacter::Look(const FInputActionValue& Value)
 void AThirdPersonCharacter::HandleInteract()
 {
 	InteractComponent->InteractWithObject();
+	isArmed = true;
 }
 
 void AThirdPersonCharacter::HandleFireDown()
@@ -262,6 +273,11 @@ bool AThirdPersonCharacter::Server_SwitchWeapon_Validate(AThirdPersonCharacter* 
 void AThirdPersonCharacter::Multi_DropWeapon_Implementation(ABasePistol* DropWeapon)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Fired Multi"));
+	if (!DropWeapon)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Gun is null."));
+		return;
+	}
 	DropWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	DropWeapon->SphereComponentZ->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }

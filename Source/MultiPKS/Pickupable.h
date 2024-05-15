@@ -21,9 +21,9 @@ class MULTIPKS_API IPickupable
 	GENERATED_BODY()
 
 public:
-	virtual void HighlightObject() = 0;
+	virtual void HighlightObject(AThirdPersonCharacter* InteractingCharacter) = 0;
 
-	virtual void UnHighlightObject() = 0;
+	virtual void UnHighlightObject(AThirdPersonCharacter* InteractingCharacter) = 0;
 
 	virtual ABasePistol* PickupObject(AThirdPersonCharacter* Character) = 0;
 	

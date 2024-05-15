@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PlayerAmmoHUD.h"
 #include "GameFramework/Character.h"
 #include "Old Content/BasePistol.h"
 #include "ThirdPersonCharacter.generated.h"
@@ -89,6 +90,8 @@ private:
 public:
 	USkeletalMeshComponent* GetPlayerMesh() const { return ThirdPersonPlayerMesh; }
 
+	UPlayerAmmoHUD* GetPlayerAmmoHUD() const {return PlayerAmmoHUD;}
+
 	UCameraComponent* GetMainCameraComponent() const { return MainCamera; }
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -113,6 +116,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|InteractComp")
 	UInteractComp* InteractComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|Widgets")
+	TSubclassOf<UPlayerAmmoHUD> PlayerAmmoHUDClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|Widgets")
+	UPlayerAmmoHUD* PlayerAmmoHUD;
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<ABasePistol*> PlayerWeapon;

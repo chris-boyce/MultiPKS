@@ -25,7 +25,7 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void Multi_AttachGun(ABasePistol* Gun);
-
+	
 	FDropWeapon DropWeapon;
 
 protected:
@@ -35,7 +35,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	FTimerHandle TimerHandle;
-
+	
+	IPickupable* CurrentPickupable;
+	
 	IPickupable* SavedPickupable;
 	
 };

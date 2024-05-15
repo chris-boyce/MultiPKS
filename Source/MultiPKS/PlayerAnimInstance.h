@@ -26,6 +26,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="PoseDataBase")
 	UPoseSearchDatabase* UnarmedWalk;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="PoseDataBase")
+	UPoseSearchDatabase* ArmedWalk;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="PoseDataBase")
+	UPoseSearchDatabase* ArmedJump;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="PoseDataBase")
+	UPoseSearchDatabase* ArmedCrouch;
+
 	
 	
 };
