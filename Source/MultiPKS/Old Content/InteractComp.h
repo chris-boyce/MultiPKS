@@ -36,7 +36,6 @@ protected:
 
 	FTimerHandle TimerHandle;
 	
-	IPickupable* CurrentPickupable;
 	
 	IPickupable* SavedPickupable;
 	

@@ -21,10 +21,6 @@ void AThirdPersonCharacter::BeginPlay()
 		PlayerAmmoHUD = CreateWidget<UPlayerAmmoHUD>(PC, PlayerAmmoHUDClass);
 	}
 	
-	
-	
-	
-	
 	MainCamera->SetActive(true);
 	ADSCamera->SetActive(false);
 	if(InteractComponent)
@@ -71,7 +67,8 @@ void AThirdPersonCharacter::HandleFireDown()
 		{
 			Server_Fire(PlayerWeapon[CurrentlySelectedWeapon]);
 		}
-		
+		UpdateAmmoHUD(PlayerWeapon[CurrentlySelectedWeapon]->MagazineComponent->CurrentAmmo, PlayerWeapon[CurrentlySelectedWeapon]->MagazineComponent->MaxAmmo);
+	
 	}
 	
 }
@@ -131,12 +128,15 @@ void AThirdPersonCharacter::HideWeapons()
 	{
 		Server_SwitchWeapon(this);
 	}
+	PlayerWeapon[CurrentlySelectedWeapon]->BindAmmoToHUD(this);
 }
 
 void AThirdPersonCharacter::HandleDropWeapon(AThirdPersonCharacter* PlayerDropping)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Character Name: %s"), *PlayerDropping->GetName());
 	UE_LOG(LogTemp, Warning, TEXT("Recieved Broadcast"));
+	
+	PlayerWeapon[CurrentlySelectedWeapon]->UnBindAmmoToHUD(this);
 	if(HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Has Authority"));
@@ -147,6 +147,11 @@ void AThirdPersonCharacter::HandleDropWeapon(AThirdPersonCharacter* PlayerDroppi
 		UE_LOG(LogTemp, Warning, TEXT("Doesnt Have Aothorirty"));
 		Server_DropWeapon(PlayerWeapon[CurrentlySelectedWeapon]);
 	}
+}
+
+void AThirdPersonCharacter::UpdateAmmoHUD(int CurrentAmmo, int MaxAmmo)
+{
+	PlayerAmmoHUD->SetAmmoText(CurrentAmmo, MaxAmmo);
 }
 
 void AThirdPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -253,6 +258,7 @@ void AThirdPersonCharacter::Multi_SwitchWeapon_Implementation(AThirdPersonCharac
 		}
 	}
 	Character->PlayerWeapon[CurrentlySelectedWeapon]->SetActorHiddenInGame(false);
+	
 }
 
 bool AThirdPersonCharacter::Multi_SwitchWeapon_Validate(AThirdPersonCharacter* Character)

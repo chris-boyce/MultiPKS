@@ -81,9 +81,9 @@ private:
 
 	void HandleADS();
 
-	void HandleFirstWeaponSwap(){SetCurrentSelectedWeapon(0); UE_LOG(LogTemp, Warning, TEXT("Currently Gun 0")); HideWeapons();}
+	void HandleFirstWeaponSwap(){if(PlayerWeapon.Num() >= 1){SetCurrentSelectedWeapon(0); HideWeapons();}}
 
-	void HandleSecondWeaponSwap(){SetCurrentSelectedWeapon(1);UE_LOG(LogTemp, Warning, TEXT("Currently Gun 1")); HideWeapons();}
+	void HandleSecondWeaponSwap(){if(PlayerWeapon.Num() >= 2){SetCurrentSelectedWeapon(1); HideWeapons();}}
 
 	void HideWeapons();
 
@@ -91,6 +91,8 @@ public:
 	USkeletalMeshComponent* GetPlayerMesh() const { return ThirdPersonPlayerMesh; }
 
 	UPlayerAmmoHUD* GetPlayerAmmoHUD() const {return PlayerAmmoHUD;}
+
+	void UpdateAmmoHUD(int CurrentAmmo, int MaxAmmo);
 
 	UCameraComponent* GetMainCameraComponent() const { return MainCamera; }
 	

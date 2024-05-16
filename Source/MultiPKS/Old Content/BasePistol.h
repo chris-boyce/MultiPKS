@@ -9,8 +9,11 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/Actor.h"
 #include "MultiPKS/Pickupable.h"
+#include "MultiPKS/PlayerAmmoHUD.h"
 #include "MultiPKS/WeaponDisplay.h"
 #include "BasePistol.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAmmoUpdate, int, CurrentAmmo, int, MaxAmmo);
 
 UCLASS()
 class MULTIPKS_API ABasePistol : public AActor , public IPickupable
@@ -88,6 +91,16 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void DisableOutline();
+
+	UFUNCTION()
+	void BindAmmoToHUD(AThirdPersonCharacter* Character);
+	UFUNCTION()
+	void UnBindAmmoToHUD(AThirdPersonCharacter* Character);
+
+	UPROPERTY()
+	UPlayerAmmoHUD* PlayerAmmoHUD;
+
+	FOnAmmoUpdate OnAmmoUpdate;
 
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void Multi_FireSound(FVector Location);

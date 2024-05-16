@@ -84,10 +84,14 @@ void ABasePistol::UnHighlightObject(AThirdPersonCharacter* InteractingCharacter)
 
 ABasePistol* ABasePistol::PickupObject(AThirdPersonCharacter* InteractingCharacter)
 {
+	
 	if(!InteractingCharacter->GetPlayerAmmoHUD()->IsInViewport())
 	{
 		InteractingCharacter->GetPlayerAmmoHUD()->AddToViewport();
 	}
+	InteractingCharacter->UpdateAmmoHUD(MagazineComponent->CurrentAmmo, MagazineComponent->MaxAmmo);
+	
+	
 	UE_LOG(LogTemp, Warning, TEXT("Gun being returned: %s"), *this->GetName());
 	return this;
 }
@@ -126,7 +130,7 @@ void ABasePistol::Fire(AThirdPersonCharacter* FiringCharacter)
 	UE_LOG(LogTemp, Warning, TEXT("Passed Fire Function Tests"));
 
 	MagazineComponent->ConsumeAmmo();
-
+	
 	UE_LOG(LogTemp, Log, TEXT("Current Ammo: %d"), MagazineComponent->CurrentAmmo);
 	
 
@@ -140,6 +144,16 @@ void ABasePistol::Fire(AThirdPersonCharacter* FiringCharacter)
 	Multi_FireSound(SpawnLocation);
 	
 	
+	
+}
+
+void ABasePistol::BindAmmoToHUD(AThirdPersonCharacter* Character)
+{
+	
+}
+
+void ABasePistol::UnBindAmmoToHUD(AThirdPersonCharacter* Character)
+{
 	
 }
 

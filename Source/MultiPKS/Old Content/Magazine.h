@@ -37,7 +37,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	UPROPERTY(EditDefaultsOnly, Category="Mag|Ammo")
+	UPROPERTY(Replicated, EditDefaultsOnly, Category="Mag|Ammo")
 	int CurrentAmmo = 12;
 
 	UPROPERTY(EditDefaultsOnly, Category="Mag|Ammo")
@@ -67,7 +67,7 @@ public:
 	void ConsumeAmmo();
 	
 	void ReloadMag();
-
+	
 	FTimerHandle ReloadTimeHandle;
 
 };

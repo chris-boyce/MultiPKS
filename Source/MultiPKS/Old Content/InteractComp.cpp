@@ -35,28 +35,22 @@ void UInteractComp::InteractWithObject()
 		if (bHit)
 		{
 			//DrawDebugLine(GetWorld(), StartLocation, HitResult.Location, FColor::Red, false, 1.0f, 0, 1.0f);
-			CurrentPickupable = Cast<IPickupable>(HitResult.GetActor());
-			if (CurrentPickupable)
+			IPickupable* Pickupable = Cast<IPickupable>(HitResult.GetActor());
+			if (Pickupable)
 			{
-				auto gun  = CurrentPickupable->PickupObject(Cast<AThirdPersonCharacter>(GetOwner()));
+				auto gun  = Pickupable->PickupObject(Cast<AThirdPersonCharacter>(GetOwner()));
 				if(gun)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Has Gun At Server Check: %s"), *gun->GetName());
-					
 					if(GetOwner()->HasAuthority())
 					{
 						Multi_AttachGun(gun);
 					}
 					else
 					{
+						UE_LOG(LogTemp, Warning, TEXT("RUNNNING PICK THROUGH SERVER"));
 						Server_AttachGun(gun);
 					}
 					
-				}
-				else
-				{
-					
-					UE_LOG(LogTemp, Warning, TEXT("Gun is nullptr after PickupObject call"));
 				}
 			}
 		}
@@ -65,7 +59,6 @@ void UInteractComp::InteractWithObject()
 
 void UInteractComp::Server_AttachGun_Implementation(ABasePistol* Gun)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Has Gun At server pass throough: %s"), *Gun->GetName());
 	Multi_AttachGun(Gun);
 }
 
@@ -77,7 +70,7 @@ bool UInteractComp::Server_AttachGun_Validate(ABasePistol* Gun)
 
 void UInteractComp::Multi_AttachGun_Implementation(ABasePistol* Gun)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Has Gun At Multi Check: %s"), *Gun->GetName());
+	UE_LOG(LogTemp, Warning, TEXT("Has Gun At Multi Check: %s"), *Gun->GetName());
 	
 	Gun->AttachToComponent(Cast<AThirdPersonCharacter>(GetOwner())->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("GunSocket"));
 	Gun->SphereComponentZ->SetCollisionEnabled(ECollisionEnabled::NoCollision);
