@@ -3,6 +3,7 @@
 
 #include "BasePistol.h"
 
+#include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "MultiPKS/ThirdPersonCharacter.h"
 #include "MultiPKS/WeaponDisplay.h"
@@ -37,8 +38,6 @@ void ABasePistol::BeginPlay()
 {
 	Super::BeginPlay();
 	//SetMagDisplay();
-	
-	
 }
 
 void ABasePistol::Tick(float DeltaTime)
@@ -101,16 +100,30 @@ void ABasePistol::SetMagDisplay()
 	
 }
 
-void ABasePistol::FireDown(AThirdPersonCharacter* Char)
+void ABasePistol::FireDown(AThirdPersonCharacter* FiringCharacter)
 {
-	SetOwner(Char);
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *GetOwner()->GetName());
-	Fire(Char);
+	if (FiringCharacter)
+	{
+		OriginRotation = FiringCharacter->ADSCamera->GetComponentRotation();
+		GetWorld()->GetTimerManager().SetTimer(FiringTimerHandle, FTimerDelegate::CreateLambda([this, FiringCharacter]()
+		{
+			Fire(FiringCharacter);
+			
+		}), 0.2f, true);
+
+		
+	}
 }
 
 void ABasePistol::FireUp()
 {
-
+	GetWorld()->GetTimerManager().ClearTimer(FiringTimerHandle);
+	//Cast<AThirdPersonCharacter>(GetOwner())->Client_ResetRotateCamera(1.0f);
+	
+	//Cast<AThirdPersonCharacter>(GetOwner())->Client_RotateCamera(OriginRotation);
+	//UE_LOG(LogTemp, Warning, TEXT("Firing stopped"));
+	//PlayerCamera->SetWorldRotation(OriginRotation);
+	
 }
 
 void ABasePistol::Fire(AThirdPersonCharacter* FiringCharacter)
@@ -123,20 +136,27 @@ void ABasePistol::Fire(AThirdPersonCharacter* FiringCharacter)
 	}
 	if(MagazineComponent->CurrentAmmo <= 0)
 	{
-		MagazineComponent->ReloadMag();
+		FiringCharacter->Client_CallUpdateAmmo();
 		return;
 	}
 	
 	UE_LOG(LogTemp, Warning, TEXT("Passed Fire Function Tests"));
 
 	MagazineComponent->ConsumeAmmo();
+	if(HasAuthority())
+	{
+		FiringCharacter->Client_RotateCamera(1.0f, 0.0f);
+		FiringCharacter->Client_CallUpdateAmmo();
+		FiringCharacter->Client_ScreenShake(FiringCameraShake);
+	}
 	
-	UE_LOG(LogTemp, Log, TEXT("Current Ammo: %d"), MagazineComponent->CurrentAmmo);
 	
 
+	UE_LOG(LogTemp, Log, TEXT("Current Ammo: %d"), MagazineComponent->CurrentAmmo);
+	
 	APlayerController* PlayerController = Cast<APlayerController>(FiringCharacter->GetController());
-	FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-	FVector SpawnLocation = FiringCharacter->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
+	FRotator SpawnRotation = FiringCharacter->GetMainCameraComponent()->GetComponentRotation();
+	FVector SpawnLocation = FiringCharacter->GetMainCameraComponent()->GetComponentLocation();
 
 	FActorSpawnParameters ActorSpawnParams;
 	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -156,6 +176,10 @@ void ABasePistol::UnBindAmmoToHUD(AThirdPersonCharacter* Character)
 {
 	
 }
+
+
+
+
 
 void ABasePistol::Multi_FireSound_Implementation(FVector Location)
 {

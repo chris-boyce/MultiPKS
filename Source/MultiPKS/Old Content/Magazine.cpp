@@ -61,6 +61,9 @@ void AMagazine::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AMagazine, CurrentAmmo);
+	DOREPLIFETIME(AMagazine, MaxAmmo);
+	
+	
 }
 
 

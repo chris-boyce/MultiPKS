@@ -40,7 +40,7 @@ public:
 	UPROPERTY(Replicated, EditDefaultsOnly, Category="Mag|Ammo")
 	int CurrentAmmo = 12;
 
-	UPROPERTY(EditDefaultsOnly, Category="Mag|Ammo")
+	UPROPERTY(Replicated, EditDefaultsOnly, Category="Mag|Ammo")
 	int MaxAmmo = 12;
 
 	UPROPERTY(EditDefaultsOnly, Category="Mag|Reload")

@@ -110,10 +110,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|Mesh")
 	USkeletalMeshComponent* ThirdPersonPlayerMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|Cameras")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|Cameras")
 	UCameraComponent* MainCamera;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|Cameras")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|Cameras")
 	UCameraComponent* ADSCamera;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|InteractComp")
@@ -138,7 +138,10 @@ public:
 	void ChangeMoveSpeed(float MoveSpeed);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_Fire(ABasePistol* Gun);
+	void Server_Fire(AThirdPersonCharacter* ThisPlayer, ABasePistol* Gun);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_FireStop(ABasePistol* Gun);
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_MoveSpeed(float Speed);
@@ -162,6 +165,37 @@ public:
 
 	UFUNCTION()
 	void SetCurrentSelectedWeapon(int Num);
+
+	UFUNCTION(Client, Reliable)
+	void Client_CallUpdateAmmo();
+
+	UFUNCTION(Client, Reliable)
+	void Client_RotateCamera(float RotX, float RotY);
+
+	UFUNCTION(Client, Reliable)
+	void Client_ResetRotateCamera(float ResetTime);
+
+	UPROPERTY()
+	FRotator OriginCameraRotation;
+
+	FTimerHandle CameraResetTimerHandle;
+
+	UFUNCTION(Client, Reliable)
+	void Client_ScreenShake(TSubclassOf<UCameraShakeBase> Shake);
+
+	UFUNCTION()
+	void BlendBetweenCamera(AActor* GoToCam);
+
+	UFUNCTION()
+	void OnADSComplete(bool RemoveScope);
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> ScopeWidgetClass;
+
+	UPROPERTY(VisibleAnywhere)
+	UUserWidget* ScopeWidget;
+	
+	
 
 	
 };

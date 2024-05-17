@@ -13,7 +13,7 @@
 #include "MultiPKS/WeaponDisplay.h"
 #include "BasePistol.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAmmoUpdate, int, CurrentAmmo, int, MaxAmmo);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAmmoUpdate);
 
 UCLASS()
 class MULTIPKS_API ABasePistol : public AActor , public IPickupable
@@ -83,6 +83,11 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	AMagazine* MagazineComponent;
 
+	FRotator OriginRotation;
+
+	UPROPERTY()
+	UCameraComponent* PlayerCamera;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USphereComponent* SphereComponentZ;
 	
@@ -101,6 +106,9 @@ public:
 	UPlayerAmmoHUD* PlayerAmmoHUD;
 
 	FOnAmmoUpdate OnAmmoUpdate;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UCameraShakeBase> FiringCameraShake;
 
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void Multi_FireSound(FVector Location);

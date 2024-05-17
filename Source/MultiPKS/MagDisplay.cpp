@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
+#include "MagDisplay.h"
 #include "Components/TextBlock.h"
 #include "Internationalization/Text.h"
-#include "MagDisplay.h"
+
 
 void UMagDisplay::SetAllText(FString Name, FString Rarity, int Capacity, float ReloadSpeed, FString Effect,
 	float EffectChance, float EffectDuration)
