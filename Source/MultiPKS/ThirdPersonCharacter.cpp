@@ -3,6 +3,7 @@
 
 #include "ThirdPersonCharacter.h"
 #include "EnhancedInputComponent.h"
+#include "Scope.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Old Content/InteractComp.h"
@@ -18,8 +19,6 @@ void AThirdPersonCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AThirdPersonCharacter, MainCamera);
-	DOREPLIFETIME(AThirdPersonCharacter, ADSCamera);
-	
 }
 
 
@@ -32,16 +31,9 @@ void AThirdPersonCharacter::BeginPlay()
 		PlayerAmmoHUD = CreateWidget<UPlayerAmmoHUD>(PC, PlayerAmmoHUDClass);
 	}
 	OriginCameraRotation = MainCamera->GetRelativeRotation();
-	MainCamera->SetActive(true);
-	ADSCamera->SetActive(false);
 	if(InteractComponent)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Has Bound Drop"));
 		InteractComponent->DropWeapon.AddDynamic(this, &AThirdPersonCharacter::HandleDropWeapon);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Has NOT Bound Drop"));
 	}
 	
 }
@@ -80,7 +72,7 @@ void AThirdPersonCharacter::HandleFireDown()
 		}
 		
 		Client_CallUpdateAmmo();
-		OriginCameraRotation = ADSCamera->GetRelativeRotation();
+		OriginCameraRotation = MainCamera->GetRelativeRotation();
 		GetWorld()->GetTimerManager().ClearTimer(CameraResetTimerHandle);
 		
 	}
@@ -93,7 +85,7 @@ void AThirdPersonCharacter::HandleFireUp()
 	{
 		if(HasAuthority())
 		{
-			PlayerWeapon[CurrentlySelectedWeapon]->FireUp();
+			PlayerWeapon[CurrentlySelectedWeapon]->FireUp(this);
 		}
 		else
 		{
@@ -122,36 +114,27 @@ void AThirdPersonCharacter::HandleCrouch()
 
 void AThirdPersonCharacter::HandleADS()
 {
-	//UCharacterMovementComponent* CharMovementComp = GetCharacterMovement();
-	//APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	//BlendBetweenCamera(PlayerWeapon[CurrentlySelectedWeapon]);
-	FLatentActionInfo LatentInfo;
-	LatentInfo.CallbackTarget = this;
-	LatentInfo.ExecutionFunction = "OnADSComplete";
-	LatentInfo.Linkage = 0;
-	LatentInfo.UUID = FMath::Rand();
 
 
+	if(PlayerWeapon.Num() <= 0)
+	{
+		return;
+	}
 	
 	if(isADSed)
 	{
-		//BlendBetweenCamera(this);
-		UKismetSystemLibrary::MoveComponentTo(MainCamera, FVector(50.0,114,130),FRotator(-15,0,0), false, true, 0.2f,true,EMoveComponentAction::Move, LatentInfo);
 		ChangeMoveSpeed(500.0f);
-		MainCamera->SetFieldOfView(90);
-		//MainCamera->SetActive(true);
-		//ADSCamera->SetActive(false);
+		PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
 		isADSed = false;
+		PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, isADSed);
+		
 	}
 	else
 	{
-		UKismetSystemLibrary::MoveComponentTo(MainCamera, FVector(400,0,60),FRotator(0,0,0), false, false, 0.2f,true,EMoveComponentAction::Move, LatentInfo);
 		ChangeMoveSpeed(200.0f);
-		MainCamera->SetFieldOfView(50);
-		//BlendBetweenCamera(PlayerWeapon[CurrentlySelectedWeapon]);
-		//ADSCamera->SetActive(true);
-		//MainCamera->SetActive(false);
+		PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
 		isADSed = true;
+		PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, isADSed);
 	}
 	
 }
@@ -166,7 +149,6 @@ void AThirdPersonCharacter::HideWeapons()
 	{
 		Server_SwitchWeapon(this);
 	}
-	PlayerWeapon[CurrentlySelectedWeapon]->BindAmmoToHUD(this);
 }
 
 void AThirdPersonCharacter::HandleDropWeapon(AThirdPersonCharacter* PlayerDropping)
@@ -174,7 +156,6 @@ void AThirdPersonCharacter::HandleDropWeapon(AThirdPersonCharacter* PlayerDroppi
 	UE_LOG(LogTemp, Warning, TEXT("Character Name: %s"), *PlayerDropping->GetName());
 	UE_LOG(LogTemp, Warning, TEXT("Recieved Broadcast"));
 	
-	PlayerWeapon[CurrentlySelectedWeapon]->UnBindAmmoToHUD(this);
 	if(HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Has Authority"));
@@ -253,7 +234,7 @@ void AThirdPersonCharacter::ChangeMoveSpeed(float MoveSpeed)
 
 void AThirdPersonCharacter::Server_FireStop_Implementation(ABasePistol* Gun)
 {
-	Gun->FireUp();
+	Gun->FireUp(this);
 }
 
 bool AThirdPersonCharacter::Server_FireStop_Validate(ABasePistol* Gun)
@@ -301,34 +282,6 @@ void AThirdPersonCharacter::SetCurrentSelectedWeapon(int Num)
 	{
 		Server_ChangeSelectedWeapon(Num);
 	}
-}
-
-void AThirdPersonCharacter::BlendBetweenCamera(AActor* GoToCam)
-{
-	auto temp = Cast<APlayerController>(GetController());
-	temp->SetViewTargetWithBlend(GoToCam, 0.2f);
-}
-
-void AThirdPersonCharacter::OnADSComplete(bool RemoveScope)
-{
-	UE_LOG(LogTemp, Error, TEXT("ADS HAS COMPLETED !!! + ++ + ++ "));
-	if(!ScopeWidget)
-	{
-		APlayerController* PC = Cast<APlayerController>(GetController());
-		ScopeWidget = CreateWidget<UUserWidget>(PC, ScopeWidgetClass);
-	}
-	
-	if(isADSed)
-	{
-		ScopeWidget->AddToViewport();
-	}
-	else
-	{
-		ScopeWidget->RemoveFromParent();
-		
-	}
-	
-	
 }
 
 void AThirdPersonCharacter::Client_ResetRotateCamera_Implementation(float ResetTime)

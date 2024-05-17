@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Magazine.h"
 #include "MultiPKSCharacter.h"
+#include "Magazine.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/Actor.h"
@@ -13,6 +13,7 @@
 #include "MultiPKS/WeaponDisplay.h"
 #include "BasePistol.generated.h"
 
+class AScope;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAmmoUpdate);
 
 UCLASS()
@@ -29,65 +30,49 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	virtual void Tick(float DeltaTime) override;
-
-	virtual void HighlightObject(AThirdPersonCharacter* InteractingCharacter) override;
-
-	UFUNCTION(BlueprintCallable)
-	virtual void UnHighlightObject(AThirdPersonCharacter* InteractingCharacter) override;
-
-	virtual ABasePistol* PickupObject(AThirdPersonCharacter* InteractingCharacter) override;
+	
+	/*---------- Weapon UI ----------*/
 
 	void SetMagDisplay();
 
 	bool WeaponDisplayOnScreen = false;
-
+	
 	UPROPERTY()
 	UUserWidget* WeaponDisplayWidget;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Widget")
 	TSubclassOf<UWeaponDisplay> WeaponDisplay;
 	
-	UPROPERTY(EditAnywhere, Category=Projectile)
-	TSubclassOf<AActor> ProjectileClass;
+	/*---------- Debug Editor ----------*/
+	
+	UPROPERTY(EditDefaultsOnly)
+	bool EditMode = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
-	USoundBase* FireSound;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	UAnimMontage* FireAnimation;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
-	FVector MuzzleOffset;
+	/*---------- Firing ----------*/
 
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void FireDown(AThirdPersonCharacter* Char);
 
 	UFUNCTION()
-	void FireUp();
+	void FireUp(AThirdPersonCharacter* FiringCharacter);
 
 	UFUNCTION()
 	void Fire(AThirdPersonCharacter* Char);
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite , Category=Gameplay)
-	TSubclassOf<AMagazine> MagazineClass;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	TArray<TSubclassOf<AMagazine>> MagazineClasses;
-
-	UPROPERTY(EditDefaultsOnly)
-	bool EditMode = false;
+	UAnimMontage* FireAnimation;
 
 	FTimerHandle FiringTimerHandle;
 
-	UPROPERTY(VisibleAnywhere)
-	AMagazine* MagazineComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
+	USoundBase* FireSound;
 
-	FRotator OriginRotation;
-
-	UPROPERTY()
-	UCameraComponent* PlayerCamera;
-
+	UPROPERTY(EditAnywhere, Category=Projectile)
+	TSubclassOf<AActor> ProjectileClass;
+	
+	
+	/*---------- Picking Up ----------*/
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USphereComponent* SphereComponentZ;
 	
@@ -97,20 +82,40 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void DisableOutline();
 
-	UFUNCTION()
-	void BindAmmoToHUD(AThirdPersonCharacter* Character);
-	UFUNCTION()
-	void UnBindAmmoToHUD(AThirdPersonCharacter* Character);
+	virtual void HighlightObject(AThirdPersonCharacter* InteractingCharacter) override;
 
-	UPROPERTY()
-	UPlayerAmmoHUD* PlayerAmmoHUD;
+	UFUNCTION(BlueprintCallable)
+	virtual void UnHighlightObject(AThirdPersonCharacter* InteractingCharacter) override;
 
-	FOnAmmoUpdate OnAmmoUpdate;
+	virtual ABasePistol* PickupObject(AThirdPersonCharacter* InteractingCharacter) override;
+	
+
+	/*---------- Effects ----------*/
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UCameraShakeBase> FiringCameraShake;
-
+	
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void Multi_FireSound(FVector Location);
+
+	FRotator OriginRotation;
+	
+	/*---------- Magazine ----------*/
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	TArray<TSubclassOf<AMagazine>> MagazineClasses;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	AMagazine* MagazineComponent;
+	
+	FOnAmmoUpdate OnAmmoUpdate;
+
+	/*---------- Scope ----------*/
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	TArray<TSubclassOf<AScope>> ScopeClasses;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	AScope* ScopeComponent;
 	
 };

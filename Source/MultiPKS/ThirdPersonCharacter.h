@@ -112,10 +112,7 @@ public:
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|Cameras")
 	UCameraComponent* MainCamera;
-
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|Cameras")
-	UCameraComponent* ADSCamera;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|InteractComp")
 	UInteractComp* InteractComponent;
 
@@ -182,20 +179,6 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void Client_ScreenShake(TSubclassOf<UCameraShakeBase> Shake);
-
-	UFUNCTION()
-	void BlendBetweenCamera(AActor* GoToCam);
-
-	UFUNCTION()
-	void OnADSComplete(bool RemoveScope);
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UUserWidget> ScopeWidgetClass;
-
-	UPROPERTY(VisibleAnywhere)
-	UUserWidget* ScopeWidget;
-	
-	
 
 	
 };
