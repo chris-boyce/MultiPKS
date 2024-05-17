@@ -50,6 +50,24 @@ void AScope::ToggleScopeVisual(AThirdPersonCharacter* PlayerCharacter, bool isAD
 
 void AScope::ToggleCameraPosition(UCameraComponent* PlayerCamera, bool isADSed)
 {
+	if(HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("--------- TOGGLE CAMERA POS ----------"));
+		Multi_ToggleCameraPosition(PlayerCamera, isADSed);
+		
+	}
+	else
+	{
+		Server_ToggleCameraPosition(PlayerCamera, isADSed);
+	}
+	
+	
+
+}
+
+void AScope::Multi_ToggleCameraPosition_Implementation(UCameraComponent* PlayerCamera, bool isADSed)
+{
+	UE_LOG(LogTemp, Warning, TEXT("--------- TOGGLE CAMERA POS HAS RUN ----------"));
 	FLatentActionInfo LatentInfo;
 	LatentInfo.CallbackTarget = this;
 	if(isADSed)
@@ -62,7 +80,11 @@ void AScope::ToggleCameraPosition(UCameraComponent* PlayerCamera, bool isADSed)
 		UKismetSystemLibrary::MoveComponentTo(PlayerCamera, FVector(400,0,60),FRotator(0,0,0), false, false, 0.2f,true,EMoveComponentAction::Move, LatentInfo);
 		PlayerCamera->SetFieldOfView(50);
 	}
-	
+}
+
+void AScope::Server_ToggleCameraPosition_Implementation(UCameraComponent* PlayerCamera, bool isADSed)
+{
+	Multi_ToggleCameraPosition(PlayerCamera, isADSed);
 }
 
 

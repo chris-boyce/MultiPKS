@@ -36,6 +36,7 @@ void AMagazine::HandleReloadComplete()
 	UE_LOG(LogTemp, Warning, TEXT("Reload complete!"));
 	isReloading = false;
 	CurrentAmmo = MaxAmmo;
+	OnReloadComplete.Broadcast(CurrentAmmo, MaxAmmo);
 }
 
 void AMagazine::ConsumeAmmo()
@@ -43,11 +44,6 @@ void AMagazine::ConsumeAmmo()
 	UE_LOG(LogTemp, Warning, TEXT("Cosume Ammo"));
 	UE_LOG(LogTemp, Warning, TEXT("Updated Ammo On  Called Locally"));
 	CurrentAmmo = CurrentAmmo - 1;
-	
-	
-		
-	
-	
 }
 
 void AMagazine::ReloadMag()

@@ -12,6 +12,7 @@ struct FInputActionValue;
 class UInputAction;
 class UCameraComponent;
 class UInteractComp;
+class UArrowComponent;
 
 UENUM(BlueprintType)  
 enum class EWeaponType : uint8
@@ -66,6 +67,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* DropWeaponAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ReloadAction;
 	
 	void Move(const FInputActionValue& Value);
 	
@@ -81,6 +85,8 @@ private:
 
 	void HandleADS();
 
+	void HandleReload();
+
 	void HandleFirstWeaponSwap(){if(PlayerWeapon.Num() >= 1){SetCurrentSelectedWeapon(0); HideWeapons();}}
 
 	void HandleSecondWeaponSwap(){if(PlayerWeapon.Num() >= 2){SetCurrentSelectedWeapon(1); HideWeapons();}}
@@ -91,6 +97,9 @@ public:
 	USkeletalMeshComponent* GetPlayerMesh() const { return ThirdPersonPlayerMesh; }
 
 	UPlayerAmmoHUD* GetPlayerAmmoHUD() const {return PlayerAmmoHUD;}
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom")
+	FVector EditableVector;
 
 	void UpdateAmmoHUD(int CurrentAmmo, int MaxAmmo);
 
@@ -104,8 +113,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool isArmed = false;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	bool isADSed = false;
+
+	UFUNCTION()
+	bool GetIsADS() {return isADSed;}
+
+	UFUNCTION(Server, Reliable)
+	void SetADS(bool ADS);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ThirdPersonPlayer|Mesh")
 	USkeletalMeshComponent* ThirdPersonPlayerMesh;
@@ -164,18 +179,31 @@ public:
 	void SetCurrentSelectedWeapon(int Num);
 
 	UFUNCTION(Client, Reliable)
-	void Client_CallUpdateAmmo();
+	void Client_CallUpdateAmmo(int CurrentAmmo, int MaxAmmo);
 
-	UFUNCTION(Client, Reliable)
-	void Client_RotateCamera(float RotX, float RotY);
 
-	UFUNCTION(Client, Reliable)
-	void Client_ResetRotateCamera(float ResetTime);
+	UFUNCTION()
+	void ResetRotateCamera(float ResetTime);
+	UFUNCTION(Server, Reliable)
+	void Server_ResetRotateCamera(float ResetTime);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_ResetRotateCamera(float ResetTime);
+
+	
+	UFUNCTION()
+	void RotateCamera(float RotX, float RotY);
+	UFUNCTION(Server, Reliable)
+	void Server_RotateCamera(float RotX, float RotY);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_RotateCamera(float RotX, float RotY);
 
 	UPROPERTY()
 	FRotator OriginCameraRotation;
 
 	FTimerHandle CameraResetTimerHandle;
+
+	UFUNCTION(Server, Reliable)
+	void Server_Reload();
 
 	UFUNCTION(Client, Reliable)
 	void Client_ScreenShake(TSubclassOf<UCameraShakeBase> Shake);

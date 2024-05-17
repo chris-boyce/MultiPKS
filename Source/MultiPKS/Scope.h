@@ -41,4 +41,11 @@ public:
 
 	UFUNCTION()
 	void ToggleCameraPosition(UCameraComponent* PlayerCamera, bool isADSed);
+
+	UFUNCTION(Server,Reliable)
+	void Server_ToggleCameraPosition(UCameraComponent* PlayerCamera, bool isADSed);
+
+	UFUNCTION(NetMulticast,Reliable)
+	void Multi_ToggleCameraPosition(UCameraComponent* PlayerCamera, bool isADSed);
+	
 };

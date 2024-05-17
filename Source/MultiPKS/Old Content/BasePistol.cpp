@@ -14,6 +14,8 @@
 ABasePistol::ABasePistol()
 {
 	PrimaryActorTick.bCanEverTick = false;
+
+	
 }
 
 void ABasePistol::OnConstruction(const FTransform& Transform)
@@ -121,7 +123,7 @@ void ABasePistol::FireDown(AThirdPersonCharacter* FiringCharacter)
 void ABasePistol::FireUp(AThirdPersonCharacter* FiringCharacter)
 {
 	GetWorld()->GetTimerManager().ClearTimer(FiringTimerHandle);
-	FiringCharacter->Client_ResetRotateCamera(1.0f);
+	FiringCharacter->ResetRotateCamera(1.0f);
 }
 
 void ABasePistol::Fire(AThirdPersonCharacter* FiringCharacter)
@@ -132,7 +134,7 @@ void ABasePistol::Fire(AThirdPersonCharacter* FiringCharacter)
 	}
 	if(!MagazineComponent->CanFire())
 	{
-		FiringCharacter->Client_CallUpdateAmmo();
+		FiringCharacter->Client_CallUpdateAmmo(MagazineComponent->CurrentAmmo, MagazineComponent->MaxAmmo);
 		return;
 	}
 	
@@ -141,15 +143,30 @@ void ABasePistol::Fire(AThirdPersonCharacter* FiringCharacter)
 	MagazineComponent->ConsumeAmmo();
 	if(HasAuthority())
 	{
-		FiringCharacter->Client_RotateCamera(1.0f, 0.0f);
-		FiringCharacter->Client_CallUpdateAmmo();
+		FiringCharacter->Client_CallUpdateAmmo(MagazineComponent->CurrentAmmo, MagazineComponent->MaxAmmo);
 		FiringCharacter->Client_ScreenShake(FiringCameraShake);
 	}
+	FiringCharacter->RotateCamera(1.0f, 0.0f);
 	
 	UE_LOG(LogTemp, Log, TEXT("Current Ammo: %d"), MagazineComponent->CurrentAmmo);
 	
-	FRotator SpawnRotation = FiringCharacter->GetMainCameraComponent()->GetComponentRotation();
-	FVector SpawnLocation = FiringCharacter->GetMainCameraComponent()->GetComponentLocation();
+	FRotator SpawnRotation;
+	FVector SpawnLocation;
+	if(!FiringCharacter->GetIsADS())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("IS NOT ADS"));
+		SpawnRotation = FiringCharacter->GetMainCameraComponent()->GetComponentRotation();
+		SpawnLocation = FiringCharacter->GetMainCameraComponent()->GetComponentLocation();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("IS ADS"));
+		SpawnRotation = FiringCharacter->GetMainCameraComponent()->GetComponentRotation();
+		FTransform ActorTransform = FiringCharacter->GetActorTransform();
+		FVector WorldEditableVector = ActorTransform.TransformVector(FVector(100, 0, 50));
+		SpawnLocation = FiringCharacter->GetActorLocation() + WorldEditableVector;
+	}
+	
 
 	FActorSpawnParameters ActorSpawnParams;
 	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;

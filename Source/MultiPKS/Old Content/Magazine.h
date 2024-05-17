@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Magazine.generated.h"
 
+
+
 UENUM(BlueprintType)
 enum class EElementalType : uint8
 {
@@ -24,6 +26,8 @@ enum class ERarity : uint8
 	Red UMETA(DisplayName="Super"),
 	Gold UMETA(DisplayName="Legendary")
 };
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnReloadComplete, int, CurrentAmmo, int, MaxAmmo);
 
 UCLASS()
 class MULTIPKS_API AMagazine : public AActor
@@ -67,6 +71,8 @@ public:
 	void ConsumeAmmo();
 	
 	void ReloadMag();
+
+	FOnReloadComplete OnReloadComplete;
 	
 	FTimerHandle ReloadTimeHandle;
 

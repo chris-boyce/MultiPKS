@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "Scope.h"
 #include "Camera/CameraComponent.h"
+#include "Components/ArrowComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Old Content/InteractComp.h"
 #include "Net/UnrealNetwork.h"
@@ -19,6 +20,7 @@ void AThirdPersonCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AThirdPersonCharacter, MainCamera);
+	DOREPLIFETIME(AThirdPersonCharacter, isADSed);
 }
 
 
@@ -71,7 +73,6 @@ void AThirdPersonCharacter::HandleFireDown()
 			Server_Fire(this, PlayerWeapon[CurrentlySelectedWeapon]);
 		}
 		
-		Client_CallUpdateAmmo();
 		OriginCameraRotation = MainCamera->GetRelativeRotation();
 		GetWorld()->GetTimerManager().ClearTimer(CameraResetTimerHandle);
 		
@@ -91,7 +92,7 @@ void AThirdPersonCharacter::HandleFireUp()
 		{
 			Server_FireStop(PlayerWeapon[CurrentlySelectedWeapon]);
 		}
-		Client_CallUpdateAmmo();
+	
 		
 	}
 	
@@ -124,18 +125,59 @@ void AThirdPersonCharacter::HandleADS()
 	if(isADSed)
 	{
 		ChangeMoveSpeed(500.0f);
-		PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
-		isADSed = false;
-		PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, isADSed);
+		
+		if(HasAuthority())
+		{
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
+			isADSed = false;
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, isADSed);
+		}
+		else
+		{
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed);
+			SetADS(false);
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, !isADSed);
+		}
+		
 		
 	}
 	else
 	{
 		ChangeMoveSpeed(200.0f);
-		PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
-		isADSed = true;
-		PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, isADSed);
+		
+		if(HasAuthority())
+		{
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
+			isADSed = true;
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, isADSed);
+		}
+		else
+		{
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
+			SetADS(true);
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, !isADSed);
+		}
+		
 	}
+	
+}
+
+void AThirdPersonCharacter::HandleReload()
+{
+	if(PlayerWeapon.Num() <= 0)
+	{
+		return;
+	}
+	if(HasAuthority())
+	{
+		PlayerWeapon[CurrentlySelectedWeapon]->MagazineComponent->ReloadMag();
+		PlayerWeapon[CurrentlySelectedWeapon]->MagazineComponent->OnReloadComplete.AddDynamic(this, &AThirdPersonCharacter::Client_CallUpdateAmmo);
+	}
+	else
+	{
+		Server_Reload();
+	}
+	
 	
 }
 
@@ -212,12 +254,19 @@ void AThirdPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(FirstWeaponAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleFirstWeaponSwap);
 
 		EnhancedInputComponent->BindAction(SecondWeaponAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleSecondWeaponSwap);
+
+		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleReload);
 	}
 	else
 	{
 		//UE_LOG(LogTemp, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 
+}
+
+void AThirdPersonCharacter::SetADS_Implementation(bool ADS)
+{
+	isADSed = ADS;
 }
 
 void AThirdPersonCharacter::ChangeMoveSpeed(float MoveSpeed)
@@ -284,7 +333,19 @@ void AThirdPersonCharacter::SetCurrentSelectedWeapon(int Num)
 	}
 }
 
-void AThirdPersonCharacter::Client_ResetRotateCamera_Implementation(float ResetTime)
+void AThirdPersonCharacter::ResetRotateCamera(float ResetTime)
+{
+	if(HasAuthority())
+	{
+		Multi_ResetRotateCamera(ResetTime);
+	}
+	else
+	{
+		Server_ResetRotateCamera(ResetTime);
+	}
+}
+
+void AThirdPersonCharacter::Multi_ResetRotateCamera_Implementation(float ResetTime)
 {
 	UE_LOG(LogTemp, Warning, TEXT("RESET HAS BEEN CALLED !!!"));
 	GetWorld()->GetTimerManager().ClearTimer(CameraResetTimerHandle);
@@ -314,12 +375,40 @@ void AThirdPersonCharacter::Client_ResetRotateCamera_Implementation(float ResetT
 	}, 0.01f, true);
 }
 
-void AThirdPersonCharacter::Client_RotateCamera_Implementation(float RotX, float RotY)
+void AThirdPersonCharacter::RotateCamera(float RotX, float RotY)
+{
+	if(HasAuthority())
+	{
+		Multi_RotateCamera(RotX, RotY);
+	}
+	else
+	{
+		Server_RotateCamera(RotX,RotY);
+	}
+}
+
+void AThirdPersonCharacter::Multi_RotateCamera_Implementation(float RotX, float RotY)
 {
 	UE_LOG(LogTemp, Error, TEXT("CLIENT ROTATION IS FIRING"));
 	FRotator rotation = MainCamera->GetComponentRotation();
 	FRotator temp = FRotator(rotation.Pitch += RotX, rotation.Yaw += RotY, rotation.Roll);
 	MainCamera->SetWorldRotation(temp);
+}
+
+void AThirdPersonCharacter::Server_Reload_Implementation()
+{
+	PlayerWeapon[CurrentlySelectedWeapon]->MagazineComponent->ReloadMag();
+	PlayerWeapon[CurrentlySelectedWeapon]->MagazineComponent->OnReloadComplete.AddDynamic(this, &AThirdPersonCharacter::Client_CallUpdateAmmo);
+}
+
+void AThirdPersonCharacter::Server_ResetRotateCamera_Implementation(float ResetTime)
+{
+	Multi_ResetRotateCamera(ResetTime);
+}
+
+void AThirdPersonCharacter::Server_RotateCamera_Implementation(float RotX, float RotY)
+{
+	Multi_RotateCamera(RotX, RotY);
 }
 
 void AThirdPersonCharacter::Client_ScreenShake_Implementation(TSubclassOf<UCameraShakeBase> Shake)
@@ -328,34 +417,9 @@ void AThirdPersonCharacter::Client_ScreenShake_Implementation(TSubclassOf<UCamer
 	temp->ClientStartCameraShake(Shake, 10);
 }
 
-void AThirdPersonCharacter::Client_CallUpdateAmmo_Implementation()
+void AThirdPersonCharacter::Client_CallUpdateAmmo_Implementation(int CurrentAmmo, int MaxAmmo)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Update AMOOOOOO -----------------"));
-	
-	if(PlayerWeapon[CurrentlySelectedWeapon])
-	{
-		if(PlayerWeapon[CurrentlySelectedWeapon]->MagazineComponent)
-		{
-			if(PlayerWeapon[CurrentlySelectedWeapon]->MagazineComponent->CurrentAmmo)
-			{
-				UpdateAmmoHUD(PlayerWeapon[CurrentlySelectedWeapon]->MagazineComponent->CurrentAmmo,PlayerWeapon[CurrentlySelectedWeapon]->MagazineComponent->MaxAmmo);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("No Current Ammo -----------------"));
-			}
-			
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("No MagazineComp -----------------"));
-		}
-		
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No Weapon -----------------"));
-	}
+	UpdateAmmoHUD(CurrentAmmo ,MaxAmmo );
 }
 
 
