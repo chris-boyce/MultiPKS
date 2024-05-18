@@ -72,18 +72,19 @@ void AScope::Multi_ToggleCameraPosition_Implementation(UCameraComponent* PlayerC
 	LatentInfo.CallbackTarget = this;
 	if(isADSed)
 	{
-		UKismetSystemLibrary::MoveComponentTo(PlayerCamera, FVector(50.0,114,130),FRotator(-15,0,0), false, true, 0.2f,true,EMoveComponentAction::Move, LatentInfo);
+		UKismetSystemLibrary::MoveComponentTo(PlayerCamera, FVector(10.0,55,80),FRotator(0,0,0), false, true, ADSSpeed,true,EMoveComponentAction::Move, LatentInfo);
 		PlayerCamera->SetFieldOfView(90);
 	}
 	else
 	{
-		UKismetSystemLibrary::MoveComponentTo(PlayerCamera, FVector(400,0,60),FRotator(0,0,0), false, false, 0.2f,true,EMoveComponentAction::Move, LatentInfo);
-		PlayerCamera->SetFieldOfView(50);
+		UKismetSystemLibrary::MoveComponentTo(PlayerCamera, FVector(400,0,60),FRotator(0,0,0), false, false, ADSSpeed,true,EMoveComponentAction::Move, LatentInfo);
+		PlayerCamera->SetFieldOfView(FOVChange);
 	}
 }
 
 void AScope::Server_ToggleCameraPosition_Implementation(UCameraComponent* PlayerCamera, bool isADSed)
 {
+	UE_LOG(LogTemp, Warning, TEXT("--------- SERVER TOGGLE CAMERA ----------"));
 	Multi_ToggleCameraPosition(PlayerCamera, isADSed);
 }
 

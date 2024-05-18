@@ -128,13 +128,13 @@ void AThirdPersonCharacter::HandleADS()
 		
 		if(HasAuthority())
 		{
-			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->Multi_ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
 			isADSed = false;
 			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, isADSed);
 		}
 		else
 		{
-			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed);
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->Server_ToggleCameraPosition(MainCamera, isADSed);
 			SetADS(false);
 			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, !isADSed);
 		}
@@ -147,13 +147,13 @@ void AThirdPersonCharacter::HandleADS()
 		
 		if(HasAuthority())
 		{
-			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->Multi_ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
 			isADSed = true;
 			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, isADSed);
 		}
 		else
 		{
-			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->Server_ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
 			SetADS(true);
 			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, !isADSed);
 		}
