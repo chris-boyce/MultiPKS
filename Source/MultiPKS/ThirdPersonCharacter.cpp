@@ -396,8 +396,11 @@ void AThirdPersonCharacter::Multi_ResetRotateCamera_Implementation(float ResetTi
         
 		if (ElapsedTime >= ResetTime)
 		{
+			UE_LOG(LogTemp, Error, TEXT("Didnt Fail Escape"));
 			GetWorld()->GetTimerManager().ClearTimer(CameraResetTimerHandle);
-			MainCamera->SetRelativeRotation(InitialQuat.Rotator()); // Ensure it ends at the correct rotation
+			UE_LOG(LogTemp, Error, TEXT("Didnt Fail Escape 2"));
+			 // Ensure it ends at the correct rotation
+			UE_LOG(LogTemp, Error, TEXT("Got to the end"));
 		}
 	}, 0.01f, true);
 }

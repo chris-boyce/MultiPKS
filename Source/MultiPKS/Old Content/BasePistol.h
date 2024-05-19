@@ -13,6 +13,7 @@
 #include "MultiPKS/WeaponDisplay.h"
 #include "BasePistol.generated.h"
 
+class AMuzzle;
 class ABarrel;
 class AScope;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAmmoUpdate);
@@ -127,5 +128,13 @@ public:
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	ABarrel* BarrelComponent;
+
+	/*---------- Muzzle ----------*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	TArray<TSubclassOf<AMuzzle>> MuzzleClasses;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
+	AMuzzle* MuzzleComponent;
+	
 	
 };

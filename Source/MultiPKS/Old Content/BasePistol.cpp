@@ -8,6 +8,7 @@
 #include "MultiPKS/Barrel.h"
 #include "MultiPKS/BarrelDisplay.h"
 #include "MultiPKS/MagDisplay.h"
+#include "MultiPKS/Muzzle.h"
 #include "MultiPKS/Scope.h"
 #include "MultiPKS/ScopeDisplay.h"
 #include "MultiPKS/ThirdPersonCharacter.h"
@@ -37,23 +38,19 @@ void ABasePistol::BeginPlay()
 	Super::BeginPlay();
 	if(HasAuthority())
 	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
 		if (MagazineClasses.Num() > 0 && EditMode == false)
 		{
 			TSubclassOf<AMagazine> SelectedMagazineClass = MagazineClasses[FMath::RandRange(0, MagazineClasses.Num() - 1)];
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = this;
-		
 			MagazineComponent = GetWorld()->SpawnActor<AMagazine>(SelectedMagazineClass, GetActorLocation(), GetActorRotation(), SpawnParams);
 			MagazineComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 		}
 		
-		if(BarrelClasses.Num() > 0 && EditMode == false)
+		if(BarrelClasses.Num() > 0 && EditMode == false) /*Offset is needed due to model being broken | TODO : Fix This When Real Model Used*/
 		{
 			TSubclassOf<ABarrel> SelectedBarrelClass = BarrelClasses[FMath::RandRange(0, BarrelClasses.Num() - 1)];
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = this;
-
-			FVector RelativeOffset(0, 50, 0); // Offset in local space
+			FVector RelativeOffset(0, 50, 0); 
 			FVector WorldOffset = GetActorTransform().TransformVector(RelativeOffset);
 
 			BarrelComponent = GetWorld()->SpawnActor<ABarrel>(SelectedBarrelClass, GetActorLocation() + WorldOffset, GetActorRotation(), SpawnParams);
@@ -62,15 +59,16 @@ void ABasePistol::BeginPlay()
 		if(ScopeClasses.Num() > 0 && EditMode == false)
 		{
 			TSubclassOf<AScope> SelectedScopeClass = ScopeClasses[FMath::RandRange(0, ScopeClasses.Num() - 1)];
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = this;
-
 			ScopeComponent = GetWorld()->SpawnActor<AScope>(SelectedScopeClass, GetActorLocation(), GetActorRotation(), SpawnParams);
 			ScopeComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 		}
+		if(MuzzleClasses.Num() > 0 && EditMode == false)
+		{
+			TSubclassOf<AMuzzle> SelectedMuzzleClass = MuzzleClasses[FMath::RandRange(0, MuzzleClasses.Num() - 1)];
+			MuzzleComponent = GetWorld()->SpawnActor<AMuzzle>(SelectedMuzzleClass, GetActorLocation(), GetActorRotation(), SpawnParams);
+			MuzzleComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+		}
 	}
-	
-	
 	
 }
 
@@ -80,6 +78,7 @@ void ABasePistol::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(ABasePistol, MagazineComponent);
 	DOREPLIFETIME(ABasePistol, BarrelComponent);
 	DOREPLIFETIME(ABasePistol, ScopeComponent);
+	DOREPLIFETIME(ABasePistol, MuzzleComponent);
 }
 
 
@@ -176,10 +175,9 @@ void ABasePistol::Fire(AThirdPersonCharacter* FiringCharacter)
 	
 	FiringCharacter->Client_ScreenShake(FiringCameraShake);
 	BarrelComponent->Fire(FiringCharacter, ProjectileClass, MagazineComponent);
+	MuzzleComponent->PlayFireSound();
 
 
-	
-	//Multi_FireSound(SpawnLocation);
 }
 
 
