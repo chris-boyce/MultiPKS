@@ -4,16 +4,21 @@
 #include "BasePistol.h"
 
 
-#include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "MultiPKS/Barrel.h"
+#include "MultiPKS/BarrelDisplay.h"
+#include "MultiPKS/MagDisplay.h"
 #include "MultiPKS/Scope.h"
+#include "MultiPKS/ScopeDisplay.h"
 #include "MultiPKS/ThirdPersonCharacter.h"
 #include "MultiPKS/WeaponDisplay.h"
+#include "Net/UnrealNetwork.h"
 
 
 ABasePistol::ABasePistol()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	bReplicates = true;
 
 	
 }
@@ -30,27 +35,52 @@ void ABasePistol::OnConstruction(const FTransform& Transform)
 void ABasePistol::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	if (MagazineClasses.Num() > 0 && EditMode == false)
+	if(HasAuthority())
 	{
-		TSubclassOf<AMagazine> SelectedMagazineClass = MagazineClasses[FMath::RandRange(0, MagazineClasses.Num() - 1)];
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
+		if (MagazineClasses.Num() > 0 && EditMode == false)
+		{
+			TSubclassOf<AMagazine> SelectedMagazineClass = MagazineClasses[FMath::RandRange(0, MagazineClasses.Num() - 1)];
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
 		
-		MagazineComponent = GetWorld()->SpawnActor<AMagazine>(SelectedMagazineClass, GetActorLocation(), GetActorRotation(), SpawnParams);
-		MagazineComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-	}
-	if(ScopeClasses.Num() > 0 && EditMode == false)
-	{
-		TSubclassOf<AScope> SelectedScopeClass = ScopeClasses[FMath::RandRange(0, ScopeClasses.Num() - 1)];
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
+			MagazineComponent = GetWorld()->SpawnActor<AMagazine>(SelectedMagazineClass, GetActorLocation(), GetActorRotation(), SpawnParams);
+			MagazineComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+		}
+		
+		if(BarrelClasses.Num() > 0 && EditMode == false)
+		{
+			TSubclassOf<ABarrel> SelectedBarrelClass = BarrelClasses[FMath::RandRange(0, BarrelClasses.Num() - 1)];
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
 
-		ScopeComponent = GetWorld()->SpawnActor<AScope>(SelectedScopeClass, GetActorLocation(), GetActorRotation(), SpawnParams);
-		ScopeComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			FVector RelativeOffset(0, 50, 0); // Offset in local space
+			FVector WorldOffset = GetActorTransform().TransformVector(RelativeOffset);
+
+			BarrelComponent = GetWorld()->SpawnActor<ABarrel>(SelectedBarrelClass, GetActorLocation() + WorldOffset, GetActorRotation(), SpawnParams);
+			BarrelComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+		}
+		if(ScopeClasses.Num() > 0 && EditMode == false)
+		{
+			TSubclassOf<AScope> SelectedScopeClass = ScopeClasses[FMath::RandRange(0, ScopeClasses.Num() - 1)];
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+
+			ScopeComponent = GetWorld()->SpawnActor<AScope>(SelectedScopeClass, GetActorLocation(), GetActorRotation(), SpawnParams);
+			ScopeComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+		}
 	}
+	
+	
+	
 }
 
+void ABasePistol::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ABasePistol, MagazineComponent);
+	DOREPLIFETIME(ABasePistol, BarrelComponent);
+	DOREPLIFETIME(ABasePistol, ScopeComponent);
+}
 
 
 void ABasePistol::HighlightObject(AThirdPersonCharacter* InteractingCharacter)
@@ -73,6 +103,8 @@ void ABasePistol::HighlightObject(AThirdPersonCharacter* InteractingCharacter)
 			{
 				WeaponDisplayWidget->AddToViewport();
 				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_MagDisplay->SetAllText(MagazineComponent->GetName(), FString("TBA"), MagazineComponent->MaxAmmo, MagazineComponent->ReloadSpeed, FString("TBA"), MagazineComponent->ElementalPercentageChance, MagazineComponent->ElementalEffectTime );
+				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_ScopeDisplay->SetAllText(ScopeComponent->GetName(), ScopeComponent->ADSSpeed, ScopeComponent->FOVChange);
+				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_BarrelDisplay->SetAllText(BarrelComponent->GetName(), BarrelComponent->FireRate, BarrelComponent->BulletDamage, BarrelComponent->FireMode, BarrelComponent->BurstSpeed, BarrelComponent->BurstCount);
 				WeaponDisplayOnScreen = true;
 			}
 		}
@@ -102,22 +134,31 @@ ABasePistol* ABasePistol::PickupObject(AThirdPersonCharacter* InteractingCharact
 	return this;
 }
 
-void ABasePistol::SetMagDisplay()
+void ABasePistol::SetMagDisplay(AThirdPersonCharacter* InteractingCharacter)
 {
-	
+	InteractingCharacter->Client_CallUpdateAmmo(MagazineComponent->CurrentAmmo, MagazineComponent->MaxAmmo);
 }
 
 void ABasePistol::FireDown(AThirdPersonCharacter* FiringCharacter)
 {
-	if (FiringCharacter)
+	if(FiringCharacter)
 	{
-		OriginRotation = FiringCharacter->MainCamera->GetComponentRotation();
-		GetWorld()->GetTimerManager().SetTimer(FiringTimerHandle, FTimerDelegate::CreateLambda([this, FiringCharacter]()
+		if(BarrelComponent->FireMode == EFireMode::Automatic)
 		{
 			Fire(FiringCharacter);
+			GetWorld()->GetTimerManager().SetTimer(FiringTimerHandle, FTimerDelegate::CreateLambda([this, FiringCharacter]()
+				{
+					Fire(FiringCharacter);
 			
-		}), 0.2f, true);
+				}), BarrelComponent->FireRate, true);
+		}
+		else
+		{
+			Fire(FiringCharacter);
+		}
 	}
+	
+	
 }
 
 void ABasePistol::FireUp(AThirdPersonCharacter* FiringCharacter)
@@ -132,46 +173,13 @@ void ABasePistol::Fire(AThirdPersonCharacter* FiringCharacter)
 	{
 		return;
 	}
-	if(!MagazineComponent->CanFire())
-	{
-		FiringCharacter->Client_CallUpdateAmmo(MagazineComponent->CurrentAmmo, MagazineComponent->MaxAmmo);
-		return;
-	}
 	
-	UE_LOG(LogTemp, Warning, TEXT("Passed Fire Function Tests"));
+	FiringCharacter->Client_ScreenShake(FiringCameraShake);
+	BarrelComponent->Fire(FiringCharacter, ProjectileClass, MagazineComponent);
 
-	MagazineComponent->ConsumeAmmo();
-	if(HasAuthority())
-	{
-		FiringCharacter->Client_CallUpdateAmmo(MagazineComponent->CurrentAmmo, MagazineComponent->MaxAmmo);
-		FiringCharacter->Client_ScreenShake(FiringCameraShake);
-	}
-	FiringCharacter->RotateCamera(1.0f, 0.0f);
-	
-	UE_LOG(LogTemp, Log, TEXT("Current Ammo: %d"), MagazineComponent->CurrentAmmo);
-	
-	FRotator SpawnRotation;
-	FVector SpawnLocation;
-	if(!FiringCharacter->GetIsADS())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("IS NOT ADS"));
-		SpawnRotation = FiringCharacter->GetMainCameraComponent()->GetComponentRotation();
-		SpawnLocation = FiringCharacter->GetMainCameraComponent()->GetComponentLocation();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("IS ADS"));
-		SpawnRotation = FiringCharacter->GetMainCameraComponent()->GetComponentRotation();
-		FTransform ActorTransform = FiringCharacter->GetActorTransform();
-		FVector WorldEditableVector = ActorTransform.TransformVector(FVector(100, 0, 50));
-		SpawnLocation = FiringCharacter->GetActorLocation() + WorldEditableVector;
-	}
-	
 
-	FActorSpawnParameters ActorSpawnParams;
-	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnLocation , SpawnRotation , ActorSpawnParams);
-	Multi_FireSound(SpawnLocation);
+	
+	//Multi_FireSound(SpawnLocation);
 }
 
 

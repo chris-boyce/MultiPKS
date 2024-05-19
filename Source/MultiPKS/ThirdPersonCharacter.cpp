@@ -32,7 +32,6 @@ void AThirdPersonCharacter::BeginPlay()
 	{
 		PlayerAmmoHUD = CreateWidget<UPlayerAmmoHUD>(PC, PlayerAmmoHUDClass);
 	}
-	OriginCameraRotation = MainCamera->GetRelativeRotation();
 	if(InteractComponent)
 	{
 		InteractComponent->DropWeapon.AddDynamic(this, &AThirdPersonCharacter::HandleDropWeapon);
@@ -73,7 +72,6 @@ void AThirdPersonCharacter::HandleFireDown()
 			Server_Fire(this, PlayerWeapon[CurrentlySelectedWeapon]);
 		}
 		
-		OriginCameraRotation = MainCamera->GetRelativeRotation();
 		GetWorld()->GetTimerManager().ClearTimer(CameraResetTimerHandle);
 		
 	}
@@ -115,8 +113,6 @@ void AThirdPersonCharacter::HandleCrouch()
 
 void AThirdPersonCharacter::HandleADS()
 {
-
-
 	if(PlayerWeapon.Num() <= 0)
 	{
 		return;
@@ -128,18 +124,18 @@ void AThirdPersonCharacter::HandleADS()
 		
 		if(HasAuthority())
 		{
-			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->Multi_ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
+			Server_ToggleCameraPosition(MainCamera, isADSed);
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
 			isADSed = false;
 			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, isADSed);
 		}
 		else
 		{
-			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->Server_ToggleCameraPosition(MainCamera, isADSed);
+			Server_ToggleCameraPosition(MainCamera, isADSed);
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed);
 			SetADS(false);
 			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, !isADSed);
 		}
-		
-		
 	}
 	else
 	{
@@ -147,13 +143,15 @@ void AThirdPersonCharacter::HandleADS()
 		
 		if(HasAuthority())
 		{
-			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->Multi_ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
+			Server_ToggleCameraPosition(MainCamera, isADSed);
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
 			isADSed = true;
 			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, isADSed);
 		}
 		else
 		{
-			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->Server_ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
+			Server_ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
+			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed);
 			SetADS(true);
 			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, !isADSed);
 		}
@@ -179,6 +177,30 @@ void AThirdPersonCharacter::HandleReload()
 	}
 	
 	
+}
+
+void AThirdPersonCharacter::HandleFirstWeaponSwap()
+{
+	if(isADSed)
+	{
+		return;
+	}
+	if(PlayerWeapon.Num() >= 1)
+	{
+		SetCurrentSelectedWeapon(0); HideWeapons();
+	}
+}
+
+void AThirdPersonCharacter::HandleSecondWeaponSwap()
+{
+	if(isADSed)
+	{
+		return;
+	}
+	if(PlayerWeapon.Num() >= 2)
+	{
+		SetCurrentSelectedWeapon(1); HideWeapons();
+	}
 }
 
 void AThirdPersonCharacter::HideWeapons()
@@ -281,6 +303,11 @@ void AThirdPersonCharacter::ChangeMoveSpeed(float MoveSpeed)
 	}
 }
 
+void AThirdPersonCharacter::Server_CallSetMag_Implementation(ABasePistol* Gun)
+{
+	Gun->SetMagDisplay(this);
+}
+
 void AThirdPersonCharacter::Server_FireStop_Implementation(ABasePistol* Gun)
 {
 	Gun->FireUp(this);
@@ -331,6 +358,7 @@ void AThirdPersonCharacter::SetCurrentSelectedWeapon(int Num)
 	{
 		Server_ChangeSelectedWeapon(Num);
 	}
+	Server_CallSetMag(PlayerWeapon[CurrentlySelectedWeapon]);
 }
 
 void AThirdPersonCharacter::ResetRotateCamera(float ResetTime)
@@ -349,9 +377,8 @@ void AThirdPersonCharacter::Multi_ResetRotateCamera_Implementation(float ResetTi
 {
 	UE_LOG(LogTemp, Warning, TEXT("RESET HAS BEEN CALLED !!!"));
 	GetWorld()->GetTimerManager().ClearTimer(CameraResetTimerHandle);
-    
-	FRotator InitialRotation = OriginCameraRotation;
-	FQuat InitialQuat = InitialRotation.Quaternion();
+	
+	FQuat InitialQuat = FRotator::ZeroRotator.Quaternion();
 	FQuat CurrentQuat = MainCamera->GetRelativeRotation().Quaternion();
     
 	float StartTime = GetWorld()->GetTimeSeconds(); // Capture the starting time
@@ -385,6 +412,12 @@ void AThirdPersonCharacter::RotateCamera(float RotX, float RotY)
 	{
 		Server_RotateCamera(RotX,RotY);
 	}
+}
+
+void AThirdPersonCharacter::Server_ToggleCameraPosition_Implementation(UCameraComponent* Camera, bool ADS)
+{
+	PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(Camera, ADS);
+	
 }
 
 void AThirdPersonCharacter::Multi_RotateCamera_Implementation(float RotX, float RotY)
@@ -433,7 +466,6 @@ void AThirdPersonCharacter::Multi_SwitchWeapon_Implementation(AThirdPersonCharac
 		}
 	}
 	Character->PlayerWeapon[CurrentlySelectedWeapon]->SetActorHiddenInGame(false);
-	
 }
 
 bool AThirdPersonCharacter::Multi_SwitchWeapon_Validate(AThirdPersonCharacter* Character)

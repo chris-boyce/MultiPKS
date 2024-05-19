@@ -10,6 +10,8 @@ AMagazine::AMagazine()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
+	RootComponent = StaticMeshComponent;
 }
 
 

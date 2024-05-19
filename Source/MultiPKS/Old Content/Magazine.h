@@ -76,4 +76,7 @@ public:
 	
 	FTimerHandle ReloadTimeHandle;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UStaticMeshComponent* StaticMeshComponent;
+
 };

@@ -87,9 +87,9 @@ private:
 
 	void HandleReload();
 
-	void HandleFirstWeaponSwap(){if(PlayerWeapon.Num() >= 1){SetCurrentSelectedWeapon(0); HideWeapons();}}
+	void HandleFirstWeaponSwap();
 
-	void HandleSecondWeaponSwap(){if(PlayerWeapon.Num() >= 2){SetCurrentSelectedWeapon(1); HideWeapons();}}
+	void HandleSecondWeaponSwap();
 
 	void HideWeapons();
 
@@ -155,6 +155,9 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_FireStop(ABasePistol* Gun);
 
+	UFUNCTION(Server, Reliable)
+	void Server_CallSetMag(ABasePistol* Gun);
+
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_MoveSpeed(float Speed);
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
@@ -207,6 +210,9 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void Client_ScreenShake(TSubclassOf<UCameraShakeBase> Shake);
+
+	UFUNCTION(Server, Reliable)
+	void Server_ToggleCameraPosition(UCameraComponent* Camera, bool ADS);
 
 	
 };

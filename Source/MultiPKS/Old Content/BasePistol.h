@@ -13,6 +13,7 @@
 #include "MultiPKS/WeaponDisplay.h"
 #include "BasePistol.generated.h"
 
+class ABarrel;
 class AScope;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAmmoUpdate);
 
@@ -29,11 +30,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 public:	
 	
 	/*---------- Weapon UI ----------*/
 
-	void SetMagDisplay();
+	void SetMagDisplay(AThirdPersonCharacter* InteractingCharacter);
 
 	bool WeaponDisplayOnScreen = false;
 	
@@ -105,7 +108,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	TArray<TSubclassOf<AMagazine>> MagazineClasses;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	AMagazine* MagazineComponent;
 	
 	FOnAmmoUpdate OnAmmoUpdate;
@@ -115,7 +118,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	TArray<TSubclassOf<AScope>> ScopeClasses;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	AScope* ScopeComponent;
+
+	/*---------- Barrel ----------*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	TArray<TSubclassOf<ABarrel>> BarrelClasses;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
+	ABarrel* BarrelComponent;
 	
 };
