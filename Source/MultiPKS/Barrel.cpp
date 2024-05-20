@@ -3,6 +3,8 @@
 
 #include "Barrel.h"
 
+#include "Grip.h"
+#include "Muzzle.h"
 #include "Camera/CameraComponent.h"
 
 
@@ -28,23 +30,23 @@ void ABarrel::Tick(float DeltaTime)
 
 }
 
-void ABarrel::Fire(AThirdPersonCharacter* FiringCharacter, TSubclassOf<AActor> ProjectileClass, AMagazine* Magazine)
+void ABarrel::Fire(AThirdPersonCharacter* FiringCharacter, TSubclassOf<AActor> ProjectileClass, AMagazine* Magazine, AGrip* Grip, AMuzzle* Muzzle)
 {
-	HandleFire(FiringCharacter, ProjectileClass, Magazine);
+	HandleFire(FiringCharacter, ProjectileClass, Magazine, Grip, Muzzle);
 
 	if (FireMode == EFireMode::Burst)
 	{
 		for (int32 i = 1; i < BurstCount; i++)
 		{
-			GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandles[i], FTimerDelegate::CreateLambda([this, FiringCharacter, ProjectileClass, Magazine]()
+			GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandles[i], FTimerDelegate::CreateLambda([this, FiringCharacter, ProjectileClass, Magazine, Grip, Muzzle]()
 			{
-				HandleFire(FiringCharacter, ProjectileClass, Magazine);
+				HandleFire(FiringCharacter, ProjectileClass, Magazine, Grip, Muzzle);
 			}), BurstSpeed * i, false);
 		}
 	}
 }
 
-void ABarrel::HandleFire(AThirdPersonCharacter* FiringCharacter, TSubclassOf<AActor> ProjectileClass, AMagazine* Magazine)
+void ABarrel::HandleFire(AThirdPersonCharacter* FiringCharacter, TSubclassOf<AActor> ProjectileClass, AMagazine* Magazine, AGrip* Grip, AMuzzle* Muzzle)
 {
 	if(!Magazine->CanFire())
 	{
@@ -55,9 +57,9 @@ void ABarrel::HandleFire(AThirdPersonCharacter* FiringCharacter, TSubclassOf<AAc
 	UE_LOG(LogTemp, Warning, TEXT("Passed Fire Function Tests"));
 
 	Magazine->ConsumeAmmo();
-	
+	Muzzle->PlayFireSound();
 	FiringCharacter->Client_CallUpdateAmmo(Magazine->CurrentAmmo, Magazine->MaxAmmo);
-	FiringCharacter->RotateCamera(1.0f, 0.0f);
+	
 	
 	FRotator SpawnRotation;
 	FVector SpawnLocation;
@@ -78,5 +80,7 @@ void ABarrel::HandleFire(AThirdPersonCharacter* FiringCharacter, TSubclassOf<AAc
 	FActorSpawnParameters ActorSpawnParams;
 	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnLocation , SpawnRotation , ActorSpawnParams);
+
+	FiringCharacter->RotateCamera(Grip->RecoilAmount, 0.0f);
 }
 

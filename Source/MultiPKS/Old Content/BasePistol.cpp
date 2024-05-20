@@ -8,6 +8,7 @@
 #include "MultiPKS/Barrel.h"
 #include "MultiPKS/BarrelDisplay.h"
 #include "MultiPKS/Grip.h"
+#include "MultiPKS/GripDisplay.h"
 #include "MultiPKS/MagDisplay.h"
 #include "MultiPKS/Muzzle.h"
 #include "MultiPKS/MuzzleDisplay.h"
@@ -110,6 +111,7 @@ void ABasePistol::HighlightObject(AThirdPersonCharacter* InteractingCharacter)
 				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_ScopeDisplay->SetAllText(ScopeComponent->GetName(), ScopeComponent->ADSSpeed, ScopeComponent->FOVChange);
 				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_BarrelDisplay->SetAllText(BarrelComponent->GetName(), BarrelComponent->FireRate, BarrelComponent->BulletDamage, BarrelComponent->FireMode, BarrelComponent->BurstSpeed, BarrelComponent->BurstCount);
 				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_MuzzleDisplay->SetAllText(MuzzleComponent->GetName(), MuzzleComponent->FireSound.SoundLevel, MuzzleComponent->BulletVelocity);
+				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_GripDisplay->SetAllText(GripComponent->GetName(), GripComponent->UnADSMoveSpeed, GripComponent->ADSedMoveSpeed, GripComponent->RecoilAmount);
 				WeaponDisplayOnScreen = true;
 			}
 		}
@@ -180,8 +182,8 @@ void ABasePistol::Fire(AThirdPersonCharacter* FiringCharacter)
 	}
 	
 	FiringCharacter->Client_ScreenShake(FiringCameraShake);
-	BarrelComponent->Fire(FiringCharacter, ProjectileClass, MagazineComponent);
-	MuzzleComponent->PlayFireSound();
+	BarrelComponent->Fire(FiringCharacter, ProjectileClass, MagazineComponent, GripComponent, MuzzleComponent);
+	
 
 
 }

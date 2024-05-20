@@ -3,6 +3,7 @@
 
 #include "ThirdPersonCharacter.h"
 #include "EnhancedInputComponent.h"
+#include "Grip.h"
 #include "Scope.h"
 #include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
@@ -120,8 +121,7 @@ void AThirdPersonCharacter::HandleADS()
 	
 	if(isADSed)
 	{
-		ChangeMoveSpeed(500.0f);
-		
+		PlayerWeapon[CurrentlySelectedWeapon]->GripComponent->ChangePlayerSpeed(this, isADSed);
 		if(HasAuthority())
 		{
 			Server_ToggleCameraPosition(MainCamera, isADSed);
@@ -139,8 +139,7 @@ void AThirdPersonCharacter::HandleADS()
 	}
 	else
 	{
-		ChangeMoveSpeed(200.0f);
-		
+		PlayerWeapon[CurrentlySelectedWeapon]->GripComponent->ChangePlayerSpeed(this, isADSed);
 		if(HasAuthority())
 		{
 			Server_ToggleCameraPosition(MainCamera, isADSed);
@@ -375,32 +374,26 @@ void AThirdPersonCharacter::ResetRotateCamera(float ResetTime)
 
 void AThirdPersonCharacter::Multi_ResetRotateCamera_Implementation(float ResetTime)
 {
-	UE_LOG(LogTemp, Warning, TEXT("RESET HAS BEEN CALLED !!!"));
 	GetWorld()->GetTimerManager().ClearTimer(CameraResetTimerHandle);
 	
 	FQuat InitialQuat = FRotator::ZeroRotator.Quaternion();
 	FQuat CurrentQuat = MainCamera->GetRelativeRotation().Quaternion();
     
-	float StartTime = GetWorld()->GetTimeSeconds(); // Capture the starting time
+	float StartTime = GetWorld()->GetTimeSeconds(); 
     
 	GetWorld()->GetTimerManager().SetTimer(CameraResetTimerHandle, [this, InitialQuat, CurrentQuat, ResetTime, StartTime]() mutable 
 	{
 		float CurrentTime = GetWorld()->GetTimeSeconds();
-		float ElapsedTime = CurrentTime - StartTime; // Calculate elapsed time correctly
+		float ElapsedTime = CurrentTime - StartTime;
         
 		float Alpha = FMath::Clamp(ElapsedTime / ResetTime, 0.0f, 1.0f);
-		UE_LOG(LogTemp, Warning, TEXT("Elapsed Time: %f, Alpha: %f"), ElapsedTime, Alpha); // Debug Alpha value
         
 		FQuat NewQuat = FQuat::Slerp(CurrentQuat, InitialQuat, Alpha);
 		MainCamera->SetRelativeRotation(NewQuat.Rotator());
         
 		if (ElapsedTime >= ResetTime)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Didnt Fail Escape"));
 			GetWorld()->GetTimerManager().ClearTimer(CameraResetTimerHandle);
-			UE_LOG(LogTemp, Error, TEXT("Didnt Fail Escape 2"));
-			 // Ensure it ends at the correct rotation
-			UE_LOG(LogTemp, Error, TEXT("Got to the end"));
 		}
 	}, 0.01f, true);
 }
@@ -425,7 +418,6 @@ void AThirdPersonCharacter::Server_ToggleCameraPosition_Implementation(UCameraCo
 
 void AThirdPersonCharacter::Multi_RotateCamera_Implementation(float RotX, float RotY)
 {
-	UE_LOG(LogTemp, Error, TEXT("CLIENT ROTATION IS FIRING"));
 	FRotator rotation = MainCamera->GetComponentRotation();
 	FRotator temp = FRotator(rotation.Pitch += RotX, rotation.Yaw += RotY, rotation.Roll);
 	MainCamera->SetWorldRotation(temp);
@@ -488,10 +480,8 @@ bool AThirdPersonCharacter::Server_SwitchWeapon_Validate(AThirdPersonCharacter* 
 
 void AThirdPersonCharacter::Multi_DropWeapon_Implementation(ABasePistol* DropWeapon)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Fired Multi"));
 	if (!DropWeapon)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Gun is null."));
 		return;
 	}
 	DropWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
@@ -505,7 +495,6 @@ bool AThirdPersonCharacter::Multi_DropWeapon_Validate(ABasePistol* DropWeapon)
 
 void AThirdPersonCharacter::Server_DropWeapon_Implementation(ABasePistol* DropWeapon)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Fired Server"));
 	Multi_DropWeapon(DropWeapon);
 }
 

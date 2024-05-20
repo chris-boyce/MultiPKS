@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "MultiPKS/ThirdPersonCharacter.h"
 #include "Grip.generated.h"
 
 UCLASS()
@@ -31,6 +32,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
 	float RecoilAmount;
+
+	UFUNCTION()
+	void ChangePlayerSpeed(AThirdPersonCharacter* Player, bool isADSed);
 	
 
 	
