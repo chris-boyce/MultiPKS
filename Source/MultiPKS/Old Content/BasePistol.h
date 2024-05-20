@@ -8,6 +8,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/Actor.h"
+#include "MultiPKS/GunDataSingleton.h"
 #include "MultiPKS/Pickupable.h"
 #include "MultiPKS/PlayerAmmoHUD.h"
 #include "MultiPKS/WeaponDisplay.h"
@@ -146,6 +147,14 @@ public:
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	AGrip* GripComponent;
+
+private:
+	UPROPERTY(EditAnywhere, Category="Singleton", meta=(AllowPrivateAccess = "true"))
+	TSubclassOf<UGunDataSingleton> GunDataSingletonClass;
+
+	UPROPERTY(VisibleAnywhere, Category="Singleton")
+	UGunDataSingleton* GunDataSingleton;
+
 	
 	
 };

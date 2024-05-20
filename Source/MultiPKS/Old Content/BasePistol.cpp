@@ -74,6 +74,12 @@ void ABasePistol::BeginPlay()
 		}
 		
 	}
+	if (GunDataSingletonClass)
+	{
+		GunDataSingleton = NewObject<UGunDataSingleton>(this, GunDataSingletonClass);
+		UE_LOG(LogTemp, Warning, TEXT("TestInt value: %d"), GunDataSingleton->TempInt);
+		
+	}
 	
 }
 

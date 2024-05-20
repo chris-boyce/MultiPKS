@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ThirdPersonCharacter.h"
+
 #include "GameFramework/Actor.h"
 #include "Barrel.generated.h"
 

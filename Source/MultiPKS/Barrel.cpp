@@ -2,7 +2,7 @@
 
 
 #include "Barrel.h"
-
+#include "ThirdPersonCharacter.h"
 #include "Grip.h"
 #include "Muzzle.h"
 #include "Camera/CameraComponent.h"

@@ -7,6 +7,9 @@
 AGrip::AGrip()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
+	RootComponent = StaticMeshComponent;
 }
 
 void AGrip::BeginPlay()
