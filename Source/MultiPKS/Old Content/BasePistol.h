@@ -147,6 +147,9 @@ public:
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	AGrip* GripComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UStaticMeshComponent* MainMesh;
 
 private:
 	UPROPERTY(EditAnywhere, Category="Singleton", meta=(AllowPrivateAccess = "true"))

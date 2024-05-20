@@ -23,6 +23,8 @@ ABasePistol::ABasePistol()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
+	MainMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
+	RootComponent = MainMesh;
 }
 
 void ABasePistol::OnConstruction(const FTransform& Transform)
@@ -42,35 +44,32 @@ void ABasePistol::BeginPlay()
 		{
 			TSubclassOf<AMagazine> SelectedMagazineClass = MagazineClasses[FMath::RandRange(0, MagazineClasses.Num() - 1)];
 			MagazineComponent = GetWorld()->SpawnActor<AMagazine>(SelectedMagazineClass, GetActorLocation(), GetActorRotation(), SpawnParams);
-			MagazineComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			MagazineComponent->AttachToComponent(MainMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Mag_Socket"));
 		}
 		
 		if(BarrelClasses.Num() > 0 && EditMode == false) /*Offset is needed due to model being broken | TODO : Fix This When Real Model Used*/
 		{
 			TSubclassOf<ABarrel> SelectedBarrelClass = BarrelClasses[FMath::RandRange(0, BarrelClasses.Num() - 1)];
-			FVector RelativeOffset(0, 50, 0); 
-			FVector WorldOffset = GetActorTransform().TransformVector(RelativeOffset);
-
-			BarrelComponent = GetWorld()->SpawnActor<ABarrel>(SelectedBarrelClass, GetActorLocation() + WorldOffset, GetActorRotation(), SpawnParams);
-			BarrelComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			BarrelComponent = GetWorld()->SpawnActor<ABarrel>(SelectedBarrelClass, GetActorLocation(), GetActorRotation(), SpawnParams);
+			BarrelComponent->AttachToComponent(MainMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Barrel_Socket"));
 		}
 		if(ScopeClasses.Num() > 0 && EditMode == false)
 		{
 			TSubclassOf<AScope> SelectedScopeClass = ScopeClasses[FMath::RandRange(0, ScopeClasses.Num() - 1)];
 			ScopeComponent = GetWorld()->SpawnActor<AScope>(SelectedScopeClass, GetActorLocation(), GetActorRotation(), SpawnParams);
-			ScopeComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			ScopeComponent->AttachToComponent(MainMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Scope_Socket"));
 		}
 		if(MuzzleClasses.Num() > 0 && EditMode == false)
 		{
 			TSubclassOf<AMuzzle> SelectedMuzzleClass = MuzzleClasses[FMath::RandRange(0, MuzzleClasses.Num() - 1)];
 			MuzzleComponent = GetWorld()->SpawnActor<AMuzzle>(SelectedMuzzleClass, GetActorLocation(), GetActorRotation(), SpawnParams);
-			MuzzleComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			MuzzleComponent->AttachToComponent(BarrelComponent->StaticMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Muzzle_Socket"));
 		}
 		if(GripClasses.Num() > 0 && EditMode == false)
 		{
 			TSubclassOf<AGrip> SelectedGripClass = GripClasses[FMath::RandRange(0, GripClasses.Num() - 1)];
 			GripComponent = GetWorld()->SpawnActor<AGrip>(SelectedGripClass, GetActorLocation(), GetActorRotation(), SpawnParams);
-			GripComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			GripComponent->AttachToComponent(BarrelComponent->StaticMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Grip_Socket"));
 		}
 		
 	}
