@@ -16,6 +16,7 @@
 class AMuzzle;
 class ABarrel;
 class AScope;
+class AGrip;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAmmoUpdate);
 
 UCLASS()
@@ -123,6 +124,7 @@ public:
 	AScope* ScopeComponent;
 
 	/*---------- Barrel ----------*/
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	TArray<TSubclassOf<ABarrel>> BarrelClasses;
 
@@ -130,11 +132,20 @@ public:
 	ABarrel* BarrelComponent;
 
 	/*---------- Muzzle ----------*/
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	TArray<TSubclassOf<AMuzzle>> MuzzleClasses;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	AMuzzle* MuzzleComponent;
+
+	/*---------- Grip ----------*/
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	TArray<TSubclassOf<AGrip>> GripClasses;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
+	AGrip* GripComponent;
 	
 	
 };

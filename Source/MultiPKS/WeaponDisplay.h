@@ -9,6 +9,7 @@
 class UBarrelDisplay;
 class UScopeDisplay;
 class UMagDisplay;
+class UMuzzleDisplay;
 UCLASS()
 class MULTIPKS_API UWeaponDisplay : public UUserWidget
 {
@@ -22,6 +23,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText")
 	TObjectPtr<UBarrelDisplay> BP_BarrelDisplay = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText")
+	TObjectPtr<UMuzzleDisplay> BP_MuzzleDisplay = nullptr;
 
 	
 };

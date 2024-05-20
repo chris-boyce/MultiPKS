@@ -7,8 +7,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "MultiPKS/Barrel.h"
 #include "MultiPKS/BarrelDisplay.h"
+#include "MultiPKS/Grip.h"
 #include "MultiPKS/MagDisplay.h"
 #include "MultiPKS/Muzzle.h"
+#include "MultiPKS/MuzzleDisplay.h"
 #include "MultiPKS/Scope.h"
 #include "MultiPKS/ScopeDisplay.h"
 #include "MultiPKS/ThirdPersonCharacter.h"
@@ -20,16 +22,11 @@ ABasePistol::ABasePistol()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
-
-	
 }
 
 void ABasePistol::OnConstruction(const FTransform& Transform)
 {
-	
 	Super::OnConstruction(Transform);
-	
-	
 }
 
 
@@ -68,6 +65,13 @@ void ABasePistol::BeginPlay()
 			MuzzleComponent = GetWorld()->SpawnActor<AMuzzle>(SelectedMuzzleClass, GetActorLocation(), GetActorRotation(), SpawnParams);
 			MuzzleComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 		}
+		if(GripClasses.Num() > 0 && EditMode == false)
+		{
+			TSubclassOf<AGrip> SelectedGripClass = GripClasses[FMath::RandRange(0, GripClasses.Num() - 1)];
+			GripComponent = GetWorld()->SpawnActor<AGrip>(SelectedGripClass, GetActorLocation(), GetActorRotation(), SpawnParams);
+			GripComponent->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+		}
+		
 	}
 	
 }
@@ -79,6 +83,7 @@ void ABasePistol::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(ABasePistol, BarrelComponent);
 	DOREPLIFETIME(ABasePistol, ScopeComponent);
 	DOREPLIFETIME(ABasePistol, MuzzleComponent);
+	DOREPLIFETIME(ABasePistol, GripComponent);
 }
 
 
@@ -104,6 +109,7 @@ void ABasePistol::HighlightObject(AThirdPersonCharacter* InteractingCharacter)
 				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_MagDisplay->SetAllText(MagazineComponent->GetName(), FString("TBA"), MagazineComponent->MaxAmmo, MagazineComponent->ReloadSpeed, FString("TBA"), MagazineComponent->ElementalPercentageChance, MagazineComponent->ElementalEffectTime );
 				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_ScopeDisplay->SetAllText(ScopeComponent->GetName(), ScopeComponent->ADSSpeed, ScopeComponent->FOVChange);
 				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_BarrelDisplay->SetAllText(BarrelComponent->GetName(), BarrelComponent->FireRate, BarrelComponent->BulletDamage, BarrelComponent->FireMode, BarrelComponent->BurstSpeed, BarrelComponent->BurstCount);
+				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_MuzzleDisplay->SetAllText(MuzzleComponent->GetName(), MuzzleComponent->FireSound.SoundLevel, MuzzleComponent->BulletVelocity);
 				WeaponDisplayOnScreen = true;
 			}
 		}
