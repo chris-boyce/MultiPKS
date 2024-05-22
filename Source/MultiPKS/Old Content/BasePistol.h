@@ -107,9 +107,6 @@ public:
 	FRotator OriginRotation;
 	
 	/*---------- Magazine ----------*/
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	TArray<TSubclassOf<AMagazine>> MagazineClasses;
 	
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	AMagazine* MagazineComponent;
@@ -117,38 +114,27 @@ public:
 	FOnAmmoUpdate OnAmmoUpdate;
 
 	/*---------- Scope ----------*/
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	TArray<TSubclassOf<AScope>> ScopeClasses;
 	
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	AScope* ScopeComponent;
 
 	/*---------- Barrel ----------*/
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	TArray<TSubclassOf<ABarrel>> BarrelClasses;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	ABarrel* BarrelComponent;
 
 	/*---------- Muzzle ----------*/
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	TArray<TSubclassOf<AMuzzle>> MuzzleClasses;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	AMuzzle* MuzzleComponent;
 
 	/*---------- Grip ----------*/
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	TArray<TSubclassOf<AGrip>> GripClasses;
-
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	AGrip* GripComponent;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* MainMesh;
 
 private:
@@ -157,6 +143,13 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category="Singleton")
 	UGunDataSingleton* GunDataSingleton;
+
+	UPROPERTY(Replicated, VisibleAnywhere)
+	EWeaponTypes WeaponType;
+	
+	UPROPERTY(Replicated, VisibleAnywhere)
+	FReturnWeaponData WeaponData;
+
 
 	
 	

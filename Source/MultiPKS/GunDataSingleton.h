@@ -29,6 +29,9 @@ struct FWeaponTypeStruct
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Gun")
 	EWeaponTypes WeaponType;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Gun")
+	UStaticMesh* BaseMesh;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Gun|Magazine")
 	TArray<TSubclassOf<AMagazine>> Magazines;
 
@@ -44,9 +47,32 @@ struct FWeaponTypeStruct
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Gun|Barrel")
 	TArray<TSubclassOf<AGrip>> Grips;
 	
-	FWeaponTypeStruct() : WeaponType(EWeaponTypes::EWT_Rifle) 
+	FWeaponTypeStruct() : WeaponType(EWeaponTypes::EWT_Rifle), BaseMesh(nullptr)
 	{
 	}
+};
+USTRUCT(BlueprintType)
+struct FReturnWeaponData
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Gun")
+	UStaticMesh* BaseMesh;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Gun|ReturnData")
+	TSubclassOf<AMagazine> Magazine;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Gun|ReturnData")
+	TSubclassOf<AScope> Scope;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Gun|ReturnData")
+	TSubclassOf<ABarrel> Barrel;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Gun|ReturnData")
+	TSubclassOf<AMuzzle> Muzzle;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Gun|ReturnData")
+	TSubclassOf<AGrip> Grips;
 };
 
 class AScope;
@@ -62,13 +88,22 @@ class MULTIPKS_API UGunDataSingleton : public UObject
 public:
 	static UGunDataSingleton* Get();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Gun Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Gun|BaseMeshes")
+	TArray<UStaticMesh*> BaseMeshes;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Gun|Data")
 	int TempInt = 32;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Gun Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Gun|Data")
 	TArray<FWeaponTypeStruct> MasterWeaponData;
 
+	UFUNCTION(BlueprintCallable, Category="BaseMesh")
+	void GetWeaponBaseMesh();
 	
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+
+	UFUNCTION(BlueprintCallable, Category="Gun|ReturnData")
+	FReturnWeaponData ReturnGunData(EWeaponTypes WeaponType);
 
 private:
 	static UGunDataSingleton* SingletonInstance;

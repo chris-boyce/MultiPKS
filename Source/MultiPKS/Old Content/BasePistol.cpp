@@ -38,53 +38,81 @@ void ABasePistol::BeginPlay()
 	Super::BeginPlay();
 	if(HasAuthority())
 	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
-		if (MagazineClasses.Num() > 0 && EditMode == false)
+		int32 MaxWeaponTypes = static_cast<int32>(EWeaponTypes::EWT_Pistol) + 1; 
+		int32 RandomIndex = FMath::RandRange(0, MaxWeaponTypes - 1);
+		WeaponType = static_cast<EWeaponTypes>(RandomIndex);
+		UE_LOG(LogTemp, Log, TEXT("Selected Weapon Type: %d"), static_cast<int32>(WeaponType));
+		if (!GunDataSingletonClass)
 		{
-			TSubclassOf<AMagazine> SelectedMagazineClass = MagazineClasses[FMath::RandRange(0, MagazineClasses.Num() - 1)];
-			MagazineComponent = GetWorld()->SpawnActor<AMagazine>(SelectedMagazineClass, GetActorLocation(), GetActorRotation(), SpawnParams);
-			MagazineComponent->AttachToComponent(MainMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Mag_Socket"));
+			UE_LOG(LogTemp, Error, TEXT("Gun Data Singleton"));
+			return;
 		}
-		
-		if(BarrelClasses.Num() > 0 && EditMode == false) /*Offset is needed due to model being broken | TODO : Fix This When Real Model Used*/
-		{
-			TSubclassOf<ABarrel> SelectedBarrelClass = BarrelClasses[FMath::RandRange(0, BarrelClasses.Num() - 1)];
-			BarrelComponent = GetWorld()->SpawnActor<ABarrel>(SelectedBarrelClass, GetActorLocation(), GetActorRotation(), SpawnParams);
-			BarrelComponent->AttachToComponent(MainMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Barrel_Socket"));
-		}
-		if(ScopeClasses.Num() > 0 && EditMode == false)
-		{
-			TSubclassOf<AScope> SelectedScopeClass = ScopeClasses[FMath::RandRange(0, ScopeClasses.Num() - 1)];
-			ScopeComponent = GetWorld()->SpawnActor<AScope>(SelectedScopeClass, GetActorLocation(), GetActorRotation(), SpawnParams);
-			ScopeComponent->AttachToComponent(MainMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Scope_Socket"));
-		}
-		if(MuzzleClasses.Num() > 0 && EditMode == false)
-		{
-			TSubclassOf<AMuzzle> SelectedMuzzleClass = MuzzleClasses[FMath::RandRange(0, MuzzleClasses.Num() - 1)];
-			MuzzleComponent = GetWorld()->SpawnActor<AMuzzle>(SelectedMuzzleClass, GetActorLocation(), GetActorRotation(), SpawnParams);
-			MuzzleComponent->AttachToComponent(BarrelComponent->StaticMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Muzzle_Socket"));
-		}
-		if(GripClasses.Num() > 0 && EditMode == false)
-		{
-			TSubclassOf<AGrip> SelectedGripClass = GripClasses[FMath::RandRange(0, GripClasses.Num() - 1)];
-			GripComponent = GetWorld()->SpawnActor<AGrip>(SelectedGripClass, GetActorLocation(), GetActorRotation(), SpawnParams);
-			GripComponent->AttachToComponent(BarrelComponent->StaticMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Grip_Socket"));
-		}
-		
-	}
-	if (GunDataSingletonClass)
-	{
+	
 		GunDataSingleton = NewObject<UGunDataSingleton>(this, GunDataSingletonClass);
 		UE_LOG(LogTemp, Warning, TEXT("TestInt value: %d"), GunDataSingleton->TempInt);
-		
+		WeaponData = GunDataSingleton->ReturnGunData(WeaponType);
 	}
+	
+	
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+
+	MainMesh->SetStaticMesh(WeaponData.BaseMesh);
+	
+	if(!WeaponData.Magazine)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No MagazineClass"));
+		Destroy();
+		return;
+	}
+	MagazineComponent = GetWorld()->SpawnActor<AMagazine>(WeaponData.Magazine, GetActorLocation(), GetActorRotation(), SpawnParams);
+	MagazineComponent->AttachToComponent(MainMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Mag_Socket"));
+		
+	if(!WeaponData.Barrel)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No Barrel Class"));
+		Destroy();
+		return;
+	}
+	BarrelComponent = GetWorld()->SpawnActor<ABarrel>(WeaponData.Barrel, GetActorLocation(), GetActorRotation(), SpawnParams);
+	BarrelComponent->AttachToComponent(MainMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Barrel_Socket"));
+
+	if(!WeaponData.Scope)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No Scope Class"));
+		Destroy();
+		return;
+	}
+	ScopeComponent = GetWorld()->SpawnActor<AScope>(WeaponData.Scope, GetActorLocation(), GetActorRotation(), SpawnParams);
+	ScopeComponent->AttachToComponent(MainMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Scope_Socket"));
+		
+	if(!WeaponData.Muzzle)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No Muzzle Class"));
+		Destroy();
+		return;
+	}
+	MuzzleComponent = GetWorld()->SpawnActor<AMuzzle>(WeaponData.Muzzle, GetActorLocation(), GetActorRotation(), SpawnParams);
+	MuzzleComponent->AttachToComponent(BarrelComponent->StaticMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Muzzle_Socket"));
+		
+	if(!WeaponData.Grips)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No Grip Class"));
+		Destroy();
+		return;
+	}
+	GripComponent = GetWorld()->SpawnActor<AGrip>(WeaponData.Grips, GetActorLocation(), GetActorRotation(), SpawnParams);
+	GripComponent->AttachToComponent(BarrelComponent->StaticMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Grip_Socket"));
+
 	
 }
 
 void ABasePistol::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ABasePistol, MainMesh);
+	DOREPLIFETIME(ABasePistol, WeaponType);
+	DOREPLIFETIME(ABasePistol, WeaponData);
 	DOREPLIFETIME(ABasePistol, MagazineComponent);
 	DOREPLIFETIME(ABasePistol, BarrelComponent);
 	DOREPLIFETIME(ABasePistol, ScopeComponent);
@@ -145,6 +173,8 @@ ABasePistol* ABasePistol::PickupObject(AThirdPersonCharacter* InteractingCharact
 	UE_LOG(LogTemp, Warning, TEXT("Gun being returned: %s"), *this->GetName());
 	return this;
 }
+
+
 
 void ABasePistol::SetMagDisplay(AThirdPersonCharacter* InteractingCharacter)
 {
