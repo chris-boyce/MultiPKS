@@ -214,5 +214,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_ToggleCameraPosition(UCameraComponent* Camera, bool ADS);
 
+
+	void GetAllAttachedActorsRecursively(AActor* ParentActor, TArray<AActor*>& OutActors);
 	
 };

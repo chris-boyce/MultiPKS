@@ -410,6 +410,23 @@ void AThirdPersonCharacter::RotateCamera(float RotX, float RotY)
 	}
 }
 
+void AThirdPersonCharacter::GetAllAttachedActorsRecursively(AActor* ParentActor, TArray<AActor*>& OutActors)
+{
+	TArray<AActor*> DirectlyAttachedActors;
+	ParentActor->GetAttachedActors(DirectlyAttachedActors);
+
+	for (AActor* Actor : DirectlyAttachedActors)
+	{
+		if (!OutActors.Contains(Actor))
+		{
+			OutActors.Add(Actor); 
+			Actor->SetActorHiddenInGame(false); 
+			
+			GetAllAttachedActorsRecursively(Actor, OutActors);
+		}
+	}
+}
+
 void AThirdPersonCharacter::Server_ToggleCameraPosition_Implementation(UCameraComponent* Camera, bool ADS)
 {
 	PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(Camera, ADS);
@@ -453,15 +470,28 @@ void AThirdPersonCharacter::Client_CallUpdateAmmo_Implementation(int CurrentAmmo
 
 void AThirdPersonCharacter::Multi_SwitchWeapon_Implementation(AThirdPersonCharacter* Character)
 {
+	Character->PlayerWeapon[0]->SetActorHiddenInGame(true);
+	Character->PlayerWeapon[1]->SetActorHiddenInGame(true);
 	for (ABasePistol* Weapon : Character->PlayerWeapon)
 	{
-		if (Weapon)
+		TArray<AActor*> AttachedActors;
+		GetAllAttachedActorsRecursively(Weapon, AttachedActors);
+		for (AActor* Actor : AttachedActors)
 		{
-			Weapon->SetActorHiddenInGame(true);
+			Actor->SetActorHiddenInGame(true);
 		}
 	}
+	TArray<AActor*> AttachedActors;
 	Character->PlayerWeapon[CurrentlySelectedWeapon]->SetActorHiddenInGame(false);
+	GetAllAttachedActorsRecursively(PlayerWeapon[CurrentlySelectedWeapon], AttachedActors);
+	for (AActor* Actor : AttachedActors)
+	{
+		Actor->SetActorHiddenInGame(false);
+	}
+	
 }
+
+
 
 bool AThirdPersonCharacter::Multi_SwitchWeapon_Validate(AThirdPersonCharacter* Character)
 {
