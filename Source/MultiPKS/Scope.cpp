@@ -52,6 +52,7 @@ void AScope::ToggleCameraPosition(UCameraComponent* PlayerCamera, bool isADSed)
 {
 	UE_LOG(LogTemp, Warning, TEXT("--------- SERVER TOGGLE CAMERA ----------"));
 	UE_LOG(LogTemp, Warning, TEXT("--------- TOGGLE CAMERA POS HAS RUN ----------"));
+	
 	FLatentActionInfo LatentInfo;
 	LatentInfo.CallbackTarget = this;
 	if(isADSed)
@@ -61,8 +62,9 @@ void AScope::ToggleCameraPosition(UCameraComponent* PlayerCamera, bool isADSed)
 	}
 	else
 	{
-		UKismetSystemLibrary::MoveComponentTo(PlayerCamera, FVector(400,0,60),FRotator(0,0,0), false, false, ADSSpeed,true,EMoveComponentAction::Move, LatentInfo);
+		UKismetSystemLibrary::MoveComponentTo(PlayerCamera, FVector(300,0,70),FRotator(0,0,0), false, false, ADSSpeed,true,EMoveComponentAction::Move, LatentInfo);
 		PlayerCamera->SetFieldOfView(FOVChange);
+		
 	}
 	
 	/*

@@ -71,9 +71,7 @@ void ABarrel::HandleFire(AThirdPersonCharacter* FiringCharacter, TSubclassOf<AAc
 	else
 	{
 		SpawnRotation = FiringCharacter->GetMainCameraComponent()->GetComponentRotation();
-		FTransform ActorTransform = FiringCharacter->GetActorTransform();
-		FVector WorldEditableVector = ActorTransform.TransformVector(FVector(100, 0, 50));
-		SpawnLocation = FiringCharacter->GetActorLocation() + WorldEditableVector;
+		SpawnLocation = FiringCharacter->GetMainCameraComponent()->GetComponentLocation();
 	}
 	
 
