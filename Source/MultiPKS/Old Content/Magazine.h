@@ -61,6 +61,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="Mag|Rarity")
 	ERarity Rarity =  ERarity::Blue;
+
+	UPROPERTY(EditDefaultsOnly, Category="Seed")
+	FString Seed = "A";
 	
 	bool CanFire();
 

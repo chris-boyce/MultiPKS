@@ -40,6 +40,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Barrel|Attributes")
 	float BulletDamage = 10.0f;
 
+	UPROPERTY(EditDefaultsOnly, Category="Seed")
+	FString Seed = "A";
+
 	UPROPERTY(EditDefaultsOnly, Category="Barrel|Attributes")
 	EFireMode FireMode = EFireMode::Automatic;
 

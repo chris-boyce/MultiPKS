@@ -10,10 +10,11 @@
 UENUM(BlueprintType)
 enum class EWeaponTypes : uint8
 {
-	EWT_SMG UMETA(DisplayName = "SMG", Value = 0),
-	EWT_Rifle UMETA(DisplayName = "Rifle", Value = 1),
-	EWT_Sniper UMETA(DisplayName = "Sniper", Value = 2),
-	EWT_Pistol UMETA(DisplayName = "Pistol", Value = 3)
+	EWT_SMG UMETA(DisplayName = "SMG", Value = 1),
+	EWT_Rifle UMETA(DisplayName = "Rifle", Value = 2),
+	EWT_Sniper UMETA(DisplayName = "Sniper", Value = 3),
+	EWT_Pistol UMETA(DisplayName = "Pistol", Value = 4),
+	EWeaponTypes_MAX UMETA(Hidden) 
 };
 
 class AScope;
@@ -101,11 +102,36 @@ public:
 	void GetWeaponBaseMesh();
 	
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	
+	FReturnWeaponData ReturnGunData();
 
-	UFUNCTION(BlueprintCallable, Category="Gun|ReturnData")
-	FReturnWeaponData ReturnGunData(EWeaponTypes WeaponType);
+	FReturnWeaponData ReturnGunData(FString Seed);
+
+	UFUNCTION()
+	bool CheckSeedData(FString GunSeed);
+	EWeaponTypes GetWeaponTypeByNumber(int32 Number);
+	int32 GetWeaponTypeCount() const;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<int> SeedArray;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<int> AdjustedSeedArray;
+
+	template<typename T>
+	T GetElementFromArray(int32 Index, const TArray<T>& Array);
 
 private:
 	static UGunDataSingleton* SingletonInstance;
 	
 };
+
+template <typename T>
+T UGunDataSingleton::GetElementFromArray(int32 Index, const TArray<T>& Array)
+{
+	while (Index >= Array.Num())
+	{
+		Index = Index - Array.Num();
+	}
+	return Array[Index];
+}

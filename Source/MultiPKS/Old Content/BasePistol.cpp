@@ -38,19 +38,14 @@ void ABasePistol::BeginPlay()
 	Super::BeginPlay();
 	if(HasAuthority())
 	{
-		int32 MaxWeaponTypes = static_cast<int32>(EWeaponTypes::EWT_Pistol) + 1; 
-		int32 RandomIndex = FMath::RandRange(0, MaxWeaponTypes - 1);
-		WeaponType = static_cast<EWeaponTypes>(RandomIndex);
-		UE_LOG(LogTemp, Log, TEXT("Selected Weapon Type: %d"), static_cast<int32>(WeaponType));
 		if (!GunDataSingletonClass)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Gun Data Singleton"));
 			return;
 		}
-	
 		GunDataSingleton = NewObject<UGunDataSingleton>(this, GunDataSingletonClass);
 		UE_LOG(LogTemp, Warning, TEXT("TestInt value: %d"), GunDataSingleton->TempInt);
-		WeaponData = GunDataSingleton->ReturnGunData(WeaponType);
+		WeaponData = GunDataSingleton->ReturnGunData("011111");
 	}
 	
 	

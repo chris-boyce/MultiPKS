@@ -30,6 +30,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
 	float ADSedMoveSpeed;
 
+	UPROPERTY(EditDefaultsOnly, Category="Seed")
+	FString Seed = "A";
+
 	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
 	float RecoilAmount;
 

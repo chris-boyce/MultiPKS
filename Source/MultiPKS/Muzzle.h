@@ -52,6 +52,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Muzzle|Sound")
 	FBulletSound FireSound;
 
+	UPROPERTY(EditDefaultsOnly, Category="Seed")
+	FString Seed = "A";
+	
 	void PlayFireSound();
 
 	UFUNCTION(NetMulticast, Reliable)

@@ -36,6 +36,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* StaticMeshComponent;
 
+	UPROPERTY(EditDefaultsOnly, Category="Seed")
+	FString Seed = "A";
+
 	UFUNCTION()
 	void ToggleScopeVisual(AThirdPersonCharacter* PlayerCharacter, bool isADSed);
 
