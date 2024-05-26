@@ -137,6 +137,12 @@ public:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* MainMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Seed")
+	bool GunIsRandom;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Seed")
+	FString GunSeed;
+
 private:
 	UPROPERTY(EditAnywhere, Category="Singleton", meta=(AllowPrivateAccess = "true"))
 	TSubclassOf<UGunDataSingleton> GunDataSingletonClass;

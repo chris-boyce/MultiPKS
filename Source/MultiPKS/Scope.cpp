@@ -62,7 +62,7 @@ void AScope::ToggleCameraPosition(UCameraComponent* PlayerCamera, bool isADSed)
 	}
 	else
 	{
-		UKismetSystemLibrary::MoveComponentTo(PlayerCamera, FVector(300,0,70),FRotator(0,0,0), false, false, ADSSpeed,true,EMoveComponentAction::Move, LatentInfo);
+		UKismetSystemLibrary::MoveComponentTo(PlayerCamera, FVector(350,0,70),FRotator(0,0,0), false, false, ADSSpeed,true,EMoveComponentAction::Move, LatentInfo);
 		PlayerCamera->SetFieldOfView(FOVChange);
 		
 	}
@@ -95,7 +95,7 @@ void AScope::Multi_ToggleCameraPosition_Implementation(UCameraComponent* PlayerC
 	}
 	else
 	{
-		UKismetSystemLibrary::MoveComponentTo(PlayerCamera, FVector(400,0,60),FRotator(0,0,0), false, false, ADSSpeed,true,EMoveComponentAction::Move, LatentInfo);
+		UKismetSystemLibrary::MoveComponentTo(PlayerCamera, FVector(350,0,60),FRotator(0,0,0), false, false, ADSSpeed,true,EMoveComponentAction::Move, LatentInfo);
 		PlayerCamera->SetFieldOfView(FOVChange);
 	}
 }

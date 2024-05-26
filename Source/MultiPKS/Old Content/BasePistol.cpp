@@ -45,7 +45,15 @@ void ABasePistol::BeginPlay()
 		}
 		GunDataSingleton = NewObject<UGunDataSingleton>(this, GunDataSingletonClass);
 		UE_LOG(LogTemp, Warning, TEXT("TestInt value: %d"), GunDataSingleton->TempInt);
-		WeaponData = GunDataSingleton->ReturnGunData("011111");
+		if(GunIsRandom)
+		{
+			WeaponData = GunDataSingleton->ReturnGunData();
+		}
+		else
+		{
+			WeaponData = GunDataSingleton->ReturnGunData(GunSeed);
+		}
+		
 	}
 	
 	
