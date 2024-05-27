@@ -32,5 +32,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText")
 	TObjectPtr<UGripDisplay> BP_GripDisplay = nullptr;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartRemoveFromParent();
+
 	
 };

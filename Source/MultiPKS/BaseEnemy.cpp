@@ -70,11 +70,7 @@ UActorComponent* ABaseEnemy::GetComponentByName(FName CompName)
 void ABaseEnemy::OnComponentHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
-	
-		UE_LOG(LogTemp, Warning, TEXT("Has Been Hit : %s"), *Hit.MyBoneName.ToString());
-	
-	
-	
+		//UE_LOG(LogTemp, Warning, TEXT("Has Been Hit : %s"), *Hit.MyBoneName.ToString());
 }
 
 void ABaseEnemy::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -87,15 +83,7 @@ void ABaseEnemy::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiv
                            FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
-	if(HasAuthority())
-	{
-		if(auto temp = Cast<ABullet>(Other))
-		{
-			TakeDamage(temp->Damage);
-			UE_LOG(LogTemp, Warning, TEXT("Has Been Hit : %s"), *Hit.MyBoneName.ToString());
-		}
-		
-	}
+	
 	
 }
 

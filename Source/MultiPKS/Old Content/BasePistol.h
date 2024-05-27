@@ -44,7 +44,7 @@ public:
 	bool WeaponDisplayOnScreen = false;
 	
 	UPROPERTY()
-	UUserWidget* WeaponDisplayWidget;
+	UWeaponDisplay* WeaponDisplayWidget;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Widget")
 	TSubclassOf<UWeaponDisplay> WeaponDisplay;

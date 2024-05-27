@@ -22,8 +22,12 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	
+	void InitializeVariables(float BulletDamage, float BulletVelocity);
 
-	float Damage = 25;
+	float Damage = 0;
+
+
+	
 private:
 
 	/** Sphere collision component */
@@ -33,5 +37,9 @@ private:
 	/** Projectile movement component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* ProjectileMovement;
+
+	virtual void NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
+
+	
 
 };

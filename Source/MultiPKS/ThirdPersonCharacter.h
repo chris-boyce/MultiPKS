@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Damageable.h"
+#include "HealthBarDisplay.h"
 #include "PlayerAmmoHUD.h"
 #include "GameFramework/Character.h"
 #include "Old Content/BasePistol.h"
@@ -23,7 +25,7 @@ enum class EWeaponType : uint8
 };
 
 UCLASS()
-class MULTIPKS_API AThirdPersonCharacter : public ACharacter
+class MULTIPKS_API AThirdPersonCharacter : public ACharacter, public IDamageable
 {
 	GENERATED_BODY()
 
@@ -214,6 +216,22 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_ToggleCameraPosition(UCameraComponent* Camera, bool ADS);
 
+	virtual void TakeDamage(float DamageAmount) override;
+
+	virtual float GetHealth() const override;
+
+	UPROPERTY(VisibleAnywhere, Category="Health")
+	float CurrentHealth = 100.0f;
+
+	UPROPERTY(VisibleAnywhere, Category="Health")
+	float MaxHealth = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="UI")
+	TSubclassOf<UHealthBarDisplay> HealthBarClass;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="UI")
+	UHealthBarDisplay* HealthBarDisplay;
+	
 
 	void GetAllAttachedActorsRecursively(AActor* ParentActor, TArray<AActor*>& OutActors);
 	

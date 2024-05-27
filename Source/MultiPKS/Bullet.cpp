@@ -3,6 +3,8 @@
 
 #include "Bullet.h"
 
+#include "Damageable.h"
+
 
 ABullet::ABullet()
 {
@@ -32,13 +34,34 @@ ABullet::ABullet()
 void ABullet::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 
 void ABullet::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
 
+void ABullet::InitializeVariables(float BulletDamage, float BulletVelocity)
+{
+	Damage = BulletDamage;
+	ProjectileMovement->InitialSpeed = BulletVelocity;
+	ProjectileMovement->MaxSpeed = BulletVelocity;
+}
+
+void ABullet::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved,
+	FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+	if(HasAuthority())
+	{
+		if(auto temp = Cast<IDamageable>(Other))
+		{
+			temp->TakeDamage(Damage);
+			//DamageText(DamageAmount, Hit.Location);
+			UE_LOG(LogTemp, Warning, TEXT("Has Been Hit : %s"), *Hit.BoneName.ToString());
+		}
+		
+	}
 }
 

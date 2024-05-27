@@ -2,6 +2,8 @@
 
 
 #include "Barrel.h"
+
+#include "Bullet.h"
 #include "ThirdPersonCharacter.h"
 #include "Grip.h"
 #include "Muzzle.h"
@@ -77,7 +79,9 @@ void ABarrel::HandleFire(AThirdPersonCharacter* FiringCharacter, TSubclassOf<AAc
 
 	FActorSpawnParameters ActorSpawnParams;
 	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnLocation , SpawnRotation , ActorSpawnParams);
+	ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(ProjectileClass, SpawnLocation , SpawnRotation , ActorSpawnParams);
+	Bullet->InitializeVariables(BulletDamage, Muzzle->BulletVelocity);
+
 
 	FiringCharacter->RotateCamera(Grip->RecoilAmount, 0.0f);
 }

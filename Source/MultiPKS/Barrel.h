@@ -59,6 +59,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="Barrel|Attributes|Burst", meta = (EditCondition = "FireMode == EFireMode::Burst"))
 	int BurstCount = 3;
+
 	
 
 };

@@ -33,6 +33,11 @@ void AThirdPersonCharacter::BeginPlay()
 	{
 		PlayerAmmoHUD = CreateWidget<UPlayerAmmoHUD>(PC, PlayerAmmoHUDClass);
 	}
+	if(HealthBarClass && PC)
+	{
+		HealthBarDisplay = CreateWidget<UHealthBarDisplay>(PC, HealthBarClass);
+		HealthBarDisplay->AddToViewport();
+	}
 	if(InteractComponent)
 	{
 		InteractComponent->DropWeapon.AddDynamic(this, &AThirdPersonCharacter::HandleDropWeapon);
@@ -241,14 +246,7 @@ void AThirdPersonCharacter::HandleDropWeapon(AThirdPersonCharacter* PlayerDroppi
 
 void AThirdPersonCharacter::UpdateAmmoHUD(int CurrentAmmo, int MaxAmmo)
 {
-	if(!HasAuthority())
-	{
-		PlayerAmmoHUD->SetAmmoText(CurrentAmmo, MaxAmmo);
-	}
-	else
-	{
-		PlayerAmmoHUD->SetAmmoText(CurrentAmmo, MaxAmmo);
-	}
+	PlayerAmmoHUD->SetAmmoText(CurrentAmmo, MaxAmmo);
 }
 
 void AThirdPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -416,6 +414,17 @@ void AThirdPersonCharacter::RotateCamera(float RotX, float RotY)
 	{
 		Server_RotateCamera(RotX,RotY);
 	}
+}
+
+void AThirdPersonCharacter::TakeDamage(float DamageAmount)
+{
+	CurrentHealth = CurrentHealth - DamageAmount;
+	HealthBarDisplay->UpdateHealth(CurrentHealth, MaxHealth);
+}
+
+float AThirdPersonCharacter::GetHealth() const
+{
+	return CurrentHealth;
 }
 
 void AThirdPersonCharacter::GetAllAttachedActorsRecursively(AActor* ParentActor, TArray<AActor*>& OutActors)

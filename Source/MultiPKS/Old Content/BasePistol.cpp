@@ -138,16 +138,16 @@ void ABasePistol::HighlightObject(AThirdPersonCharacter* InteractingCharacter)
 		if (PC && WeaponDisplay)  
 		{
 
-			WeaponDisplayWidget = CreateWidget<UUserWidget>(PC, WeaponDisplay);
+			WeaponDisplayWidget = CreateWidget<UWeaponDisplay>(PC, WeaponDisplay);
 
 			if (WeaponDisplayWidget)
 			{
 				WeaponDisplayWidget->AddToViewport();
-				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_MagDisplay->SetAllText(MagazineComponent->GetName(), FString("TBA"), MagazineComponent->MaxAmmo, MagazineComponent->ReloadSpeed, FString("TBA"), MagazineComponent->ElementalPercentageChance, MagazineComponent->ElementalEffectTime );
-				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_ScopeDisplay->SetAllText(ScopeComponent->GetName(), ScopeComponent->ADSSpeed, ScopeComponent->FOVChange);
-				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_BarrelDisplay->SetAllText(BarrelComponent->GetName(), BarrelComponent->FireRate, BarrelComponent->BulletDamage, BarrelComponent->FireMode, BarrelComponent->BurstSpeed, BarrelComponent->BurstCount);
-				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_MuzzleDisplay->SetAllText(MuzzleComponent->GetName(), MuzzleComponent->FireSound.SoundLevel, MuzzleComponent->BulletVelocity);
-				Cast<UWeaponDisplay>(WeaponDisplayWidget)->BP_GripDisplay->SetAllText(GripComponent->GetName(), GripComponent->UnADSMoveSpeed, GripComponent->ADSedMoveSpeed, GripComponent->RecoilAmount);
+				WeaponDisplayWidget->BP_MagDisplay->SetAllText(MagazineComponent->GetName(), FString("TBA"), MagazineComponent->MaxAmmo, MagazineComponent->ReloadSpeed, FString("TBA"), MagazineComponent->ElementalPercentageChance, MagazineComponent->ElementalEffectTime );
+				WeaponDisplayWidget->BP_ScopeDisplay->SetAllText(ScopeComponent->GetName(), ScopeComponent->ADSSpeed, ScopeComponent->FOVChange);
+				WeaponDisplayWidget->BP_BarrelDisplay->SetAllText(BarrelComponent->GetName(), BarrelComponent->FireRate, BarrelComponent->BulletDamage, BarrelComponent->FireMode, BarrelComponent->BurstSpeed, BarrelComponent->BurstCount);
+				WeaponDisplayWidget->BP_MuzzleDisplay->SetAllText(MuzzleComponent->GetName(), MuzzleComponent->FireSound.SoundLevel, MuzzleComponent->BulletVelocity);
+				WeaponDisplayWidget->BP_GripDisplay->SetAllText(GripComponent->GetName(), GripComponent->UnADSMoveSpeed, GripComponent->ADSedMoveSpeed, GripComponent->RecoilAmount);
 				WeaponDisplayOnScreen = true;
 			}
 		}
@@ -158,8 +158,8 @@ void ABasePistol::UnHighlightObject(AThirdPersonCharacter* InteractingCharacter)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Removing Widget"));
 	DisableOutline();
-	WeaponDisplayWidget->RemoveFromParent();
-	WeaponDisplayWidget = nullptr;
+	WeaponDisplayWidget->StartRemoveFromParent();
+	//WeaponDisplayWidget = nullptr;
 	WeaponDisplayOnScreen = false;
 }
 
