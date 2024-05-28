@@ -14,12 +14,7 @@ void UHealthBarDisplay::UpdateHealth(float CurrentHealth, float MaxHealth)
 		UE_LOG(LogTemp, Error, TEXT("MaxHealth is less than or equal to 0."));
 		return;
 	}
-	if(CurrentHealth <=0.0f)
-	{
-		UE_LOG(LogTemp, Error, TEXT("YYYYYYYYYYY"));
-		return;
-	}
-
+	
 	float HealthPercentage = CurrentHealth / MaxHealth;
 	HealthPercentage = FMath::Clamp(HealthPercentage, 0.0f, 1.0f);
 	
@@ -29,15 +24,25 @@ void UHealthBarDisplay::UpdateHealth(float CurrentHealth, float MaxHealth)
 	float InverseHealthPercentage = 1.0f - HealthPercentage;
 	UE_LOG(LogTemp, Warning, TEXT("Inverse Health Percentage: %f"), InverseHealthPercentage);
 	
-	if (InverseHealthPercentage >= 0.65f)
-	{
-		TargetOpacity = InverseHealthPercentage;
-	}
-	
 	int HealthPercentageInt = FMath::RoundToInt(HealthPercentage * 100.0f);
 	FText HealthFText = FText::FromString(FString::Printf(TEXT("%d%%"), HealthPercentageInt));
 
+	if (InverseHealthPercentage >= 0.65f)
+	{
+		TargetOpacity = InverseHealthPercentage;
+		GetWorld()->GetTimerManager().SetTimer(OpacityTimerHandle, this, &UHealthBarDisplay::UpdateOpacity, 0.01f, true);
+	}
+	else
+	{
+		GetWorld()->GetTimerManager().ClearTimer(OpacityTimerHandle);
+		CurrentOpacity = 0;
+		BloodBorderZ->SetBrushColor(FLinearColor(1.0f, 1.0f, 1.0f, 0));
+	}
+
 	HealthTextZ->SetText(HealthFText);
+
+	HealthBarZ->SetPercent(HealthPercentage);
+	
 
 }
 

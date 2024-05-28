@@ -186,6 +186,9 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_CallUpdateAmmo(int CurrentAmmo, int MaxAmmo);
 
+	UFUNCTION(Client, Reliable)
+	void Client_CallUpdateHealth(float UpdatedCurrentHealth, float UpdatedMaxHealth);
+
 
 	UFUNCTION()
 	void ResetRotateCamera(float ResetTime);

@@ -366,6 +366,11 @@ void AThirdPersonCharacter::SetCurrentSelectedWeapon(int Num)
 	Server_CallSetMag(PlayerWeapon[CurrentlySelectedWeapon]);
 }
 
+void AThirdPersonCharacter::Client_CallUpdateHealth_Implementation(float UpdatedCurrentHealth, float UpdatedMaxHealth)
+{
+	HealthBarDisplay->UpdateHealth(UpdatedCurrentHealth, UpdatedMaxHealth);
+}
+
 void AThirdPersonCharacter::ResetRotateCamera(float ResetTime)
 {
 	if(HasAuthority())
@@ -419,7 +424,7 @@ void AThirdPersonCharacter::RotateCamera(float RotX, float RotY)
 void AThirdPersonCharacter::TakeDamage(float DamageAmount)
 {
 	CurrentHealth = CurrentHealth - DamageAmount;
-	HealthBarDisplay->UpdateHealth(CurrentHealth, MaxHealth);
+	Client_CallUpdateHealth(CurrentHealth, MaxHealth);
 }
 
 float AThirdPersonCharacter::GetHealth() const
