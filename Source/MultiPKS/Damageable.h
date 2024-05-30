@@ -19,9 +19,9 @@ class MULTIPKS_API IDamageable
 	GENERATED_BODY()
 	
 public:
-	UFUNCTION(Category="Damage")
 	virtual void TakeDamage(float DamageAmount) = 0;
-
-	UFUNCTION(Category="Damage")
+	
+	virtual void DetailedTakeDamage(float DamageAmount, FVector HitLocation) = 0;
+	
 	virtual float GetHealth() const = 0;
 };

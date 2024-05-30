@@ -38,6 +38,10 @@ void AThirdPersonCharacter::BeginPlay()
 		HealthBarDisplay = CreateWidget<UHealthBarDisplay>(PC, HealthBarClass);
 		HealthBarDisplay->AddToViewport();
 	}
+	if(InGameSettingClass && PC)
+	{
+		InGameSettingDisplay = CreateWidget<UInGameSettingDisplay>(PC, InGameSettingClass);
+	}
 	if(InteractComponent)
 	{
 		InteractComponent->DropWeapon.AddDynamic(this, &AThirdPersonCharacter::HandleDropWeapon);
@@ -47,6 +51,10 @@ void AThirdPersonCharacter::BeginPlay()
 
 void AThirdPersonCharacter::Move(const FInputActionValue& Value)
 {
+	if(CanPerformAction == false)
+	{
+		return;
+	}
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	AddMovementInput(GetActorForwardVector(), MovementVector.Y);
 	AddMovementInput(GetActorRightVector(), MovementVector.X);
@@ -54,6 +62,10 @@ void AThirdPersonCharacter::Move(const FInputActionValue& Value)
 
 void AThirdPersonCharacter::Look(const FInputActionValue& Value)
 {
+	if(CanPerformAction == false)
+	{
+		return;
+	}
 	FVector2D LookInput = Value.Get<FVector2D>();
 	AddControllerYawInput(LookInput.X);
 	AddControllerPitchInput(LookInput.Y);
@@ -61,12 +73,20 @@ void AThirdPersonCharacter::Look(const FInputActionValue& Value)
 
 void AThirdPersonCharacter::HandleInteract()
 {
+	if(CanPerformAction == false)
+	{
+		return;
+	}
 	InteractComponent->InteractWithObject();
 	isArmed = true;
 }
 
 void AThirdPersonCharacter::HandleFireDown()
 {
+	if(CanPerformAction == false)
+	{
+		return;
+	}
 	if(!PlayerWeapon.IsEmpty())
 	{
 		if(HasAuthority())
@@ -105,6 +125,10 @@ void AThirdPersonCharacter::HandleFireUp()
 
 void AThirdPersonCharacter::HandleCrouch()
 {
+	if(CanPerformAction == false)
+	{
+		return;
+	}
 	if(isCrouched)
 	{
 		UnCrouch();
@@ -119,6 +143,11 @@ void AThirdPersonCharacter::HandleCrouch()
 
 void AThirdPersonCharacter::HandleADS()
 {
+	if(CanPerformAction == false)
+	{
+		return;
+	}
+	
 	if(PlayerWeapon.Num() <= 0)
 	{
 		return;
@@ -174,6 +203,10 @@ void AThirdPersonCharacter::HandleADS()
 
 void AThirdPersonCharacter::HandleReload()
 {
+	if(CanPerformAction == false)
+	{
+		return;
+	}
 	if(PlayerWeapon.Num() <= 0)
 	{
 		return;
@@ -193,6 +226,10 @@ void AThirdPersonCharacter::HandleReload()
 
 void AThirdPersonCharacter::HandleFirstWeaponSwap()
 {
+	if(CanPerformAction == false)
+	{
+		return;
+	}
 	if(isADSed)
 	{
 		return;
@@ -205,6 +242,10 @@ void AThirdPersonCharacter::HandleFirstWeaponSwap()
 
 void AThirdPersonCharacter::HandleSecondWeaponSwap()
 {
+	if(CanPerformAction == false)
+	{
+		return;
+	}
 	if(isADSed)
 	{
 		return;
@@ -215,8 +256,29 @@ void AThirdPersonCharacter::HandleSecondWeaponSwap()
 	}
 }
 
+void AThirdPersonCharacter::HandleOpenMenu()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	isMenuOpen = !isMenuOpen;
+	
+	if(isMenuOpen)
+	{
+		InGameSettingDisplay->AddToViewport();
+		PC->bShowMouseCursor = true;
+		CanPerformAction = false;
+	}
+	else
+	{
+		InGameSettingDisplay->RemoveFromParent();
+		PC->bShowMouseCursor = false;
+		CanPerformAction = true;
+	}
+	
+}
+
 void AThirdPersonCharacter::HideWeapons()
 {
+	
 	if(HasAuthority())
 	{
 		Multi_SwitchWeapon(this);
@@ -229,6 +291,10 @@ void AThirdPersonCharacter::HideWeapons()
 
 void AThirdPersonCharacter::HandleDropWeapon(AThirdPersonCharacter* PlayerDropping)
 {
+	if(CanPerformAction == false)
+	{
+		return;
+	}
 	UE_LOG(LogTemp, Warning, TEXT("Character Name: %s"), *PlayerDropping->GetName());
 	UE_LOG(LogTemp, Warning, TEXT("Recieved Broadcast"));
 	
@@ -283,6 +349,8 @@ void AThirdPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(SecondWeaponAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleSecondWeaponSwap);
 
 		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleReload);
+
+		EnhancedInputComponent->BindAction(OpenMenuAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleOpenMenu);
 	}
 	else
 	{
@@ -422,6 +490,12 @@ void AThirdPersonCharacter::RotateCamera(float RotX, float RotY)
 }
 
 void AThirdPersonCharacter::TakeDamage(float DamageAmount)
+{
+	CurrentHealth = CurrentHealth - DamageAmount;
+	Client_CallUpdateHealth(CurrentHealth, MaxHealth);
+}
+
+void AThirdPersonCharacter::DetailedTakeDamage(float DamageAmount, FVector HitLocation) /*TODO : Add Location When Damaged */
 {
 	CurrentHealth = CurrentHealth - DamageAmount;
 	Client_CallUpdateHealth(CurrentHealth, MaxHealth);

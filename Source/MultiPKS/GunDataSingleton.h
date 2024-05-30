@@ -100,8 +100,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="BaseMesh")
 	void GetWeaponBaseMesh();
-	
+
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 	
 	FReturnWeaponData ReturnGunData();
 

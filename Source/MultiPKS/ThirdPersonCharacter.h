@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Damageable.h"
 #include "HealthBarDisplay.h"
+#include "InGameSettingDisplay.h"
 #include "PlayerAmmoHUD.h"
 #include "GameFramework/Character.h"
 #include "Old Content/BasePistol.h"
@@ -72,6 +73,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ReloadAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* OpenMenuAction;
 	
 	void Move(const FInputActionValue& Value);
 	
@@ -93,7 +97,15 @@ private:
 
 	void HandleSecondWeaponSwap();
 
+	void HandleOpenMenu();
+
+	bool isMenuOpen = false;
+
+	bool CanPerformAction = true;
+
 	void HideWeapons();
+
+	
 
 public:
 	USkeletalMeshComponent* GetPlayerMesh() const { return ThirdPersonPlayerMesh; }
@@ -221,6 +233,8 @@ public:
 
 	virtual void TakeDamage(float DamageAmount) override;
 
+	virtual void DetailedTakeDamage(float DamageAmount, FVector HitLocation) override;
+
 	virtual float GetHealth() const override;
 
 	UPROPERTY(VisibleAnywhere, Category="Health")
@@ -234,6 +248,14 @@ public:
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="UI")
 	UHealthBarDisplay* HealthBarDisplay;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="UI")
+	TSubclassOf<UInGameSettingDisplay> InGameSettingClass;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="UI")
+	UInGameSettingDisplay* InGameSettingDisplay;
+
+	
 	
 
 	void GetAllAttachedActorsRecursively(AActor* ParentActor, TArray<AActor*>& OutActors);

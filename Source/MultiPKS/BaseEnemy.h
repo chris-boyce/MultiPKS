@@ -26,6 +26,8 @@ public:
 
 	virtual void TakeDamage(float DamageAmount) override;
 
+	virtual void DetailedTakeDamage(float DamageAmount, FVector HitLocation) override;
+
 	virtual float GetHealth() const override;
 	
 	UActorComponent* GetComponentByName(FName CompName);

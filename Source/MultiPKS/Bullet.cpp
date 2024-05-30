@@ -4,6 +4,7 @@
 #include "Bullet.h"
 
 #include "Damageable.h"
+#include "Net/UnrealNetwork.h"
 
 
 ABullet::ABullet()
@@ -49,15 +50,21 @@ void ABullet::InitializeVariables(float BulletDamage, float BulletVelocity)
 	ProjectileMovement->MaxSpeed = BulletVelocity;
 }
 
+void ABullet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ABullet, Damage);
+}
+
 void ABullet::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved,
-	FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+                        FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 	if(HasAuthority())
 	{
 		if(auto temp = Cast<IDamageable>(Other))
 		{
-			temp->TakeDamage(Damage);
+			temp->DetailedTakeDamage(Damage, Hit.Location);
 			//DamageText(DamageAmount, Hit.Location);
 			UE_LOG(LogTemp, Warning, TEXT("Has Been Hit : %s"), *Hit.BoneName.ToString());
 		}

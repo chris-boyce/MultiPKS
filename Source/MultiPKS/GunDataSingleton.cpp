@@ -43,13 +43,14 @@ void UGunDataSingleton::GetWeaponBaseMesh()
 		}
 	}
 }
-
+#if WITH_EDITOR
 void UGunDataSingleton::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	UObject::PostEditChangeProperty(PropertyChangedEvent);
 	UE_LOG(LogTemp, Warning, TEXT("Updated Property Called"));
 	GetWeaponBaseMesh();
 }
+#endif
 
 
 FReturnWeaponData UGunDataSingleton::ReturnGunData() /* Random Gun Generation */

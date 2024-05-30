@@ -24,6 +24,9 @@ public:
 	
 	void InitializeVariables(float BulletDamage, float BulletVelocity);
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(Replicated)
 	float Damage = 0;
 
 

@@ -23,8 +23,6 @@ void ABaseEnemy::BeginPlay()
 	SkeletalMeshComponent->SetCollisionProfileName(UCollisionProfile::PhysicsActor_ProfileName);
 	SkeletalMeshComponent->SetNotifyRigidBodyCollision(true);
 	SkeletalMeshComponent->OnComponentHit.AddDynamic(this, &ABaseEnemy::OnComponentHit);
-
-	
 }
 
 void ABaseEnemy::Tick(float DeltaTime)
@@ -47,6 +45,17 @@ void ABaseEnemy::TakeDamage(float DamageAmount)
 		Destroy();
 	}
 }
+
+void ABaseEnemy::DetailedTakeDamage(float DamageAmount, FVector HitLocation)
+{
+	CurrentHealth = CurrentHealth - DamageAmount;
+	if(CurrentHealth <= 0)
+	{
+		Destroy();
+	}
+	DamageText(DamageAmount, HitLocation);
+}
+
 
 float ABaseEnemy::GetHealth() const
 {
