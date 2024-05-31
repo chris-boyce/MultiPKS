@@ -25,19 +25,31 @@ public:
 	UStaticMeshComponent* StaticMeshComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
+	FVector2D UnADSMoveSpeedRange;
+
+	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
 	float UnADSMoveSpeed;
+
+	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
+	FVector2D ADSedMoveSpeedRange;
 
 	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
 	float ADSedMoveSpeed;
 
 	UPROPERTY(EditDefaultsOnly, Category="Seed")
 	FString Seed = "A";
+	
+	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
+	FVector2D RecoilAmountRange;
 
 	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
 	float RecoilAmount;
 
 	UFUNCTION()
 	void ChangePlayerSpeed(AThirdPersonCharacter* Player, bool isADSed);
+
+	UFUNCTION()
+	void AdjustScaleValue(int Scale);
 	
 
 	

@@ -34,21 +34,36 @@ public:
 	
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditDefaultsOnly, Category="Barrel|Attributes")
+	/* ---- FireRate ---- */
+
+	UPROPERTY(EditDefaultsOnly, Category = "Barrel|Attributes")
+	FVector2D FireRateRange;
+
+	UPROPERTY(VisibleAnywhere, Category="Barrel|Attributes")
 	float FireRate = 0.2f;
 
+	/* ---- Damage ---- */
+
 	UPROPERTY(EditDefaultsOnly, Category="Barrel|Attributes")
+	FVector2D DamageRange;
+
+	UPROPERTY(VisibleAnywhere, Category="Barrel|Attributes")
 	float BulletDamage = 10.0f;
 
-	UPROPERTY(EditDefaultsOnly, Category="Seed")
-	FString Seed = "A";
-
-	UPROPERTY(EditDefaultsOnly, Category="Barrel|Attributes")
-	EFireMode FireMode = EFireMode::Automatic;
+	/* ---- Burst ---- */
 
 	UPROPERTY(EditDefaultsOnly, Category="Barrel|Attributes|Burst", meta = (EditCondition = "FireMode == EFireMode::Burst"))
+	FVector2D BurstSpeedRange;
+
+	UPROPERTY(VisibleAnywhere, Category="Barrel|Attributes|Burst", meta = (EditCondition = "FireMode == EFireMode::Burst"))
 	float BurstSpeed = 0.05f;
 
+	UPROPERTY(VisibleAnywhere, Category="Barrel|Attributes|Burst", meta = (EditCondition = "FireMode == EFireMode::Burst"))
+	int BurstCount = 3;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Barrel|Attributes")
+	EFireMode FireMode = EFireMode::Automatic;
+	
 	UFUNCTION()
 	void Fire(AThirdPersonCharacter* FiringCharacter, TSubclassOf<AActor> ProjectileClass, AMagazine* Magazine, AGrip* Grip, AMuzzle* Muzzle);
 
@@ -56,9 +71,15 @@ public:
 	void HandleFire(AThirdPersonCharacter* FiringCharacter, TSubclassOf<AActor> ProjectileClass, AMagazine* Magazine, AGrip* Grip, AMuzzle* Muzzle);
 
 	FTimerHandle BurstFireTimerHandles[10];
-
-	UPROPERTY(EditDefaultsOnly, Category="Barrel|Attributes|Burst", meta = (EditCondition = "FireMode == EFireMode::Burst"))
-	int BurstCount = 3;
+	
+	UFUNCTION()
+	void AdjustScaleValue(int Scale);
+	
+	
+	/* --- TBA --- */
+    
+	UPROPERTY(EditDefaultsOnly, Category="Seed")
+	FString Seed = "A";
 
 	
 

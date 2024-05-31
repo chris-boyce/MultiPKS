@@ -12,6 +12,11 @@ AMagazine::AMagazine()
 	bReplicates = true;
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	RootComponent = StaticMeshComponent;
+	CurrentAmmoRange = FIntPoint(5, 50);
+	MaxAmmoRange = FIntPoint(5, 50);
+	ReloadSpeedRange = FVector2D(0.5f, 3.0f);
+	ElementalPercentageChanceRange = FVector2D(1.0f, 25.0f);
+	ElementalEffectTimeRange =  FVector2D(1.0f, 5.0f);
 }
 
 
@@ -19,6 +24,16 @@ void AMagazine::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void AMagazine::AdjustScaleValue(int Scale)
+{
+	float ScaleAlpha = static_cast<float>(Scale) / 100.0f;
+	CurrentAmmo = FMath::Lerp(CurrentAmmoRange.X, CurrentAmmoRange.Y, ScaleAlpha);
+	MaxAmmo = FMath::Lerp(MaxAmmoRange.X, MaxAmmoRange.Y, ScaleAlpha);
+	ReloadSpeed = FMath::Lerp(ReloadSpeedRange.X, ReloadSpeedRange.Y, ScaleAlpha);
+	ElementalPercentageChance = FMath::Lerp(ElementalPercentageChanceRange.X, ElementalPercentageChanceRange.Y, ScaleAlpha);
+	ElementalEffectTime =  FMath::Lerp(ElementalEffectTimeRange.X, ElementalEffectTimeRange.Y, ScaleAlpha);
 }
 
 bool AMagazine::CanFire()

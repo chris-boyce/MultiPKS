@@ -16,7 +16,9 @@ ABarrel::ABarrel()
 	bReplicates = true;
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	RootComponent = StaticMeshComponent;
-
+	FireRateRange = FVector2D(1.0f, 1.1f);
+	DamageRange = FVector2D(1.0f, 1.1f);
+	BurstSpeedRange = FVector2D(1.0f, 1.1f);
 
 }
 
@@ -84,5 +86,14 @@ void ABarrel::HandleFire(AThirdPersonCharacter* FiringCharacter, TSubclassOf<AAc
 
 
 	FiringCharacter->RotateCamera(Grip->RecoilAmount, 0.0f);
+}
+
+void ABarrel::AdjustScaleValue(int Scale)
+{
+	float ScaleAlpha = static_cast<float>(Scale) / 100.0f;
+	
+	FireRate = FMath::Lerp(FireRateRange.X, FireRateRange.Y, ScaleAlpha);
+	BurstSpeed = FMath::Lerp(BurstSpeedRange.X, BurstSpeedRange.Y, ScaleAlpha);
+	BulletDamage = FMath::Lerp(DamageRange.X, DamageRange.Y, ScaleAlpha);
 }
 

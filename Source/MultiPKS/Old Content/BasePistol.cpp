@@ -44,14 +44,30 @@ void ABasePistol::BeginPlay()
 			return;
 		}
 		GunDataSingleton = NewObject<UGunDataSingleton>(this, GunDataSingletonClass);
-		UE_LOG(LogTemp, Warning, TEXT("TestInt value: %d"), GunDataSingleton->TempInt);
 		if(GunIsRandom)
 		{
-			WeaponData = GunDataSingleton->ReturnGunData();
+			GunSeed = GenerateRandomSeed();
+			GunData = ExtractGunDataFromSeed(GunSeed);
+			ExtractValueDataFromSeed(GunSeed);
+			
+			for (int i = 1; i <= 5; ++i)
+			{
+				TransformedValueData.Add(ExponentialValueShift(ValueData[0], ValueData[i]));
+			}
+			
+			WeaponData = GunDataSingleton->ReturnGunData(GunData);
 		}
 		else
 		{
-			WeaponData = GunDataSingleton->ReturnGunData(GunSeed);
+			GunData = ExtractGunDataFromSeed(GunSeed);
+			ExtractValueDataFromSeed(GunSeed);
+			
+			for (int i = 1; i <= 5; ++i)
+			{
+				TransformedValueData.Add(ExponentialValueShift(ValueData[0], ValueData[i]));
+			}
+			
+			WeaponData = GunDataSingleton->ReturnGunData(GunData);
 		}
 		
 	}
@@ -70,6 +86,7 @@ void ABasePistol::BeginPlay()
 	}
 	MagazineComponent = GetWorld()->SpawnActor<AMagazine>(WeaponData.Magazine, GetActorLocation(), GetActorRotation(), SpawnParams);
 	MagazineComponent->AttachToComponent(MainMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Mag_Socket"));
+	MagazineComponent->AdjustScaleValue(TransformedValueData[0]);
 		
 	if(!WeaponData.Barrel)
 	{
@@ -79,7 +96,7 @@ void ABasePistol::BeginPlay()
 	}
 	BarrelComponent = GetWorld()->SpawnActor<ABarrel>(WeaponData.Barrel, GetActorLocation(), GetActorRotation(), SpawnParams);
 	BarrelComponent->AttachToComponent(MainMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Barrel_Socket"));
-
+	BarrelComponent->AdjustScaleValue(TransformedValueData[1]);
 	if(!WeaponData.Scope)
 	{
 		UE_LOG(LogTemp, Error, TEXT("No Scope Class"));
@@ -88,7 +105,7 @@ void ABasePistol::BeginPlay()
 	}
 	ScopeComponent = GetWorld()->SpawnActor<AScope>(WeaponData.Scope, GetActorLocation(), GetActorRotation(), SpawnParams);
 	ScopeComponent->AttachToComponent(MainMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Scope_Socket"));
-		
+	ScopeComponent->AdjustScaleValue(TransformedValueData[2]);
 	if(!WeaponData.Muzzle)
 	{
 		UE_LOG(LogTemp, Error, TEXT("No Muzzle Class"));
@@ -97,7 +114,7 @@ void ABasePistol::BeginPlay()
 	}
 	MuzzleComponent = GetWorld()->SpawnActor<AMuzzle>(WeaponData.Muzzle, GetActorLocation(), GetActorRotation(), SpawnParams);
 	MuzzleComponent->AttachToComponent(BarrelComponent->StaticMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Muzzle_Socket"));
-		
+	MuzzleComponent->AdjustScaleValue(TransformedValueData[3]);
 	if(!WeaponData.Grips)
 	{
 		UE_LOG(LogTemp, Error, TEXT("No Grip Class"));
@@ -106,7 +123,7 @@ void ABasePistol::BeginPlay()
 	}
 	GripComponent = GetWorld()->SpawnActor<AGrip>(WeaponData.Grips, GetActorLocation(), GetActorRotation(), SpawnParams);
 	GripComponent->AttachToComponent(BarrelComponent->StaticMeshComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("Grip_Socket"));
-
+	GripComponent->AdjustScaleValue(TransformedValueData[4]);
 	
 }
 
@@ -177,6 +194,66 @@ ABasePistol* ABasePistol::PickupObject(AThirdPersonCharacter* InteractingCharact
 	return this;
 }
 
+FString ABasePistol::GenerateRandomSeed()
+{
+	FString RandomString;
+	RandomString.Reserve(18);
+	
+	for (int32 i = 0; i < 18; ++i)
+	{
+		int32 RandomDigit = FMath::RandRange(0, 9);  
+		RandomString.AppendInt(RandomDigit);
+	}
+	
+	return RandomString;
+}
+
+FString ABasePistol::ExtractGunDataFromSeed(const FString& OriginalString)
+{
+	FString Result;
+	int DigitCount = 0;
+	
+	for (int i = 0; i < OriginalString.Len(); i++)
+	{
+		if (FChar::IsDigit(OriginalString[i]))
+		{
+			DigitCount++;
+			
+			if (DigitCount % 3 == 0)
+			{
+				Result.AppendChar(OriginalString[i]);
+			}
+		}
+	}
+
+	return Result;
+}
+
+void ABasePistol::ExtractValueDataFromSeed(const FString& OriginalString)
+{
+
+	if (OriginalString.Len() >= 18)
+	{
+		for (int i = 0; i < OriginalString.Len(); i += 3)
+		{
+			FString NumberString = OriginalString.Mid(i, 2);
+			
+			int32 Number = FCString::Atoi(*NumberString);
+			ValueData.Add(Number);
+		}
+	}
+}
+
+
+
+int ABasePistol::ExponentialValueShift(int GunBaseValue, int AttachmentBaseValue)
+{
+	float Lambda = 0.03;
+	float transformValueX = 99.0f * (1.0f - FMath::Exp(-Lambda * GunBaseValue));
+	float transformedValueY = (transformValueX / 99.0f) * 99.0f * (1.0f - FMath::Exp(-Lambda * AttachmentBaseValue));
+	int RoundedTransformValue = round(transformedValueY);
+	return RoundedTransformValue;
+}
 
 
 void ABasePistol::SetMagDisplay(AThirdPersonCharacter* InteractingCharacter)

@@ -60,6 +60,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multi_PlayFireSound();
 
+	UFUNCTION()
+	void AdjustScaleValue(int Scale);
+
 	
 
 };

@@ -40,12 +40,21 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-public:	
+public:
+	UPROPERTY(EditDefaultsOnly, Category="Mag|Ammo")
+	FIntPoint CurrentAmmoRange;
+	
 	UPROPERTY(Replicated, EditDefaultsOnly, Category="Mag|Ammo")
 	int CurrentAmmo = 12;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Mag|Ammo")
+	FIntPoint MaxAmmoRange;
 
 	UPROPERTY(Replicated, EditDefaultsOnly, Category="Mag|Ammo")
 	int MaxAmmo = 12;
+
+	UPROPERTY(EditDefaultsOnly, Category="Mag|Reload")
+	FVector2D ReloadSpeedRange;
 
 	UPROPERTY(EditDefaultsOnly, Category="Mag|Reload")
 	float ReloadSpeed = 2.0f;
@@ -54,8 +63,14 @@ public:
 	EElementalType BulletElementalType = EElementalType::None;
 
 	UPROPERTY(EditDefaultsOnly, Category="Mag|Elememtal")
+	FVector2D ElementalPercentageChanceRange;
+
+	UPROPERTY(EditDefaultsOnly, Category="Mag|Elememtal")
 	float ElementalPercentageChance = 5.0f;
 
+	UPROPERTY(EditDefaultsOnly, Category="Mag|Elememtal")
+	FVector2D ElementalEffectTimeRange;
+	
 	UPROPERTY(EditDefaultsOnly, Category="Mag|Elememtal")
 	float ElementalEffectTime = 1.0f;
 
@@ -63,7 +78,13 @@ public:
 	ERarity Rarity =  ERarity::Blue;
 
 	UPROPERTY(EditDefaultsOnly, Category="Seed")
-	FString Seed = "A";
+	FString Seed = "1";
+
+	UPROPERTY(VisibleAnywhere, Category="Seed")
+	int AttachmentScaleValue = 0;
+
+	UFUNCTION()
+	void AdjustScaleValue(int Scale);
 	
 	bool CanFire();
 

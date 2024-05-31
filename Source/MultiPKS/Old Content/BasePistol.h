@@ -143,6 +143,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Seed")
 	FString GunSeed;
 
+	UPROPERTY(VisibleAnywhere, Category="Seed");
+	FString GunData;
+
 private:
 	UPROPERTY(EditAnywhere, Category="Singleton", meta=(AllowPrivateAccess = "true"))
 	TSubclassOf<UGunDataSingleton> GunDataSingletonClass;
@@ -155,6 +158,20 @@ private:
 	
 	UPROPERTY(Replicated, VisibleAnywhere)
 	FReturnWeaponData WeaponData;
+
+	FString GenerateRandomSeed();
+
+	FString ExtractGunDataFromSeed(const FString& OriginalString);
+
+	void ExtractValueDataFromSeed(const FString& OriginalString);
+
+	UPROPERTY(VisibleAnywhere, Category = "Seed")
+	TArray<int> ValueData;
+
+	UPROPERTY(VisibleAnywhere, Category = "Seed")
+	TArray<int> TransformedValueData;
+
+	int ExponentialValueShift(int GunBaseValue, int AttachmentBaseValue);
 
 
 	

@@ -10,6 +10,9 @@ AGrip::AGrip()
 	bReplicates = true;
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	RootComponent = StaticMeshComponent;
+	UnADSMoveSpeedRange = FVector2D(400.0f, 800.0f);
+	ADSedMoveSpeedRange =  FVector2D(100.0f, 600.0f);
+	RecoilAmountRange =  FVector2D(0.1f, 3.0f);
 }
 
 void AGrip::BeginPlay()
@@ -33,5 +36,13 @@ void AGrip::ChangePlayerSpeed(AThirdPersonCharacter* Player, bool isADSed)
 		Player->ChangeMoveSpeed(ADSedMoveSpeed);
 	}
 	
+}
+
+void AGrip::AdjustScaleValue(int Scale)
+{
+	float ScaleAlpha = static_cast<float>(Scale) / 100.0f;
+	UnADSMoveSpeed = FMath::Lerp(UnADSMoveSpeedRange.X, UnADSMoveSpeedRange.Y, ScaleAlpha);
+	UnADSMoveSpeed = FMath::Lerp(ADSedMoveSpeedRange.X, ADSedMoveSpeedRange.Y, ScaleAlpha);
+	RecoilAmount = FMath::Lerp(RecoilAmountRange.X, RecoilAmountRange.Y, ScaleAlpha);
 }
 

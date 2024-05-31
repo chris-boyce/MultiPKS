@@ -21,6 +21,9 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditDefaultsOnly, Category="Scope|ADS")
+	FVector2D ADSSpeedRange;
+	
 	UPROPERTY(Replicated, EditDefaultsOnly, Category="Scope|ADS")
 	float ADSSpeed = 1.0f;
 
@@ -50,5 +53,7 @@ public:
 
 	UFUNCTION(NetMulticast,Reliable)
 	void Multi_ToggleCameraPosition(UCameraComponent* PlayerCamera, bool isADSed);
-	
+
+	UFUNCTION()
+	void AdjustScaleValue(int Scale);
 };

@@ -13,7 +13,7 @@ AScope::AScope()
 	PrimaryActorTick.bCanEverTick = true;
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	RootComponent = StaticMeshComponent;
-
+	ADSSpeedRange = FVector2D(0.5f, 2.0f);
 }
 
 void AScope::BeginPlay()
@@ -67,20 +67,13 @@ void AScope::ToggleCameraPosition(UCameraComponent* PlayerCamera, bool isADSed)
 		
 	}
 	
-	/*
-	if(HasAuthority())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("--------- TOGGLE CAMERA POS ----------"));
-		Multi_ToggleCameraPosition(PlayerCamera, isADSed);
-		
-	}
-	else
-	{
-		Server_ToggleCameraPosition(PlayerCamera, isADSed);
-	}
-	*/
-	
+}
 
+void AScope::AdjustScaleValue(int Scale)
+{
+	float ScaleAlpha = static_cast<float>(Scale) / 100.0f;
+	
+	ADSSpeed = FMath::Lerp(ADSSpeedRange.X, ADSSpeedRange.Y, ScaleAlpha);
 }
 
 void AScope::Multi_ToggleCameraPosition_Implementation(UCameraComponent* PlayerCamera, bool isADSed)
