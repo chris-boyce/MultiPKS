@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/Border.h"
 #include "GripDisplay.generated.h"
 
 class UTextBlock;
@@ -27,8 +28,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText", meta = (BindWidget))
 	UTextBlock* TXT_RecoilAmount;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText", meta = (BindWidget))
+	UTextBlock* TXT_AttachmentValue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText", meta = (BindWidget))
+	UBorder* BDR_Color;
+
+	
+
 	UFUNCTION()
-	void SetAllText(FString GripName, float UnADSMovementSpeed, float ADSMovementSpeed, float RecoilAmount );
+	void SetAllText(FString GripName, float UnADSMovementSpeed, float ADSMovementSpeed, float RecoilAmount, int AttachmentValue);
 	
 	
 };

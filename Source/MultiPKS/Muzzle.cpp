@@ -37,6 +37,7 @@ void AMuzzle::PlayFireSound()
 
 void AMuzzle::AdjustScaleValue(int Scale)
 {
+	AttachmentValue = Scale;
 	int ReverseScale = 99 - Scale;
 	BulletVelocity = BulletVelocity * (static_cast<float>(ReverseScale) / 100.0f);
 }

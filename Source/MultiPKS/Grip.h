@@ -21,6 +21,12 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditDefaultsOnly, Category="Grip")
+	FString AttachmentName = "Grip";
+
+	UPROPERTY(VisibleAnywhere, Category="Grip")
+	int AttachmentValue;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* StaticMeshComponent;
 
@@ -35,9 +41,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
 	float ADSedMoveSpeed;
-
-	UPROPERTY(EditDefaultsOnly, Category="Seed")
-	FString Seed = "A";
 	
 	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
 	FVector2D RecoilAmountRange;

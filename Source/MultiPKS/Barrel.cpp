@@ -90,6 +90,7 @@ void ABarrel::HandleFire(AThirdPersonCharacter* FiringCharacter, TSubclassOf<AAc
 
 void ABarrel::AdjustScaleValue(int Scale)
 {
+	AttachementScale = Scale;
 	float ScaleAlpha = static_cast<float>(Scale) / 100.0f;
 	
 	FireRate = FMath::Lerp(FireRateRange.X, FireRateRange.Y, ScaleAlpha);

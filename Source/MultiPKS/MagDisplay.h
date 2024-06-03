@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/Border.h"
 #include "MagDisplay.generated.h"
 
 class UTextBlock;
@@ -17,9 +18,6 @@ class MULTIPKS_API UMagDisplay : public UUserWidget
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText", meta = (BindWidget))
 	UTextBlock* TXT_MagName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText", meta = (BindWidget))
-	UTextBlock* TXT_Rarity = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText", meta = (BindWidget))
 	UTextBlock* TXT_Capacity = nullptr;
@@ -36,10 +34,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText", meta = (BindWidget))
 	UTextBlock* TXT_ElementDuration = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText", meta = (BindWidget))
+	UTextBlock* TXT_AttachmentScore = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText", meta = (BindWidget))
+	UBorder* BDR_Color;
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void RunCompSetup();
 
 	UFUNCTION()
-	void SetAllText(FString Name, FString Rarity, int Capacity, float ReloadSpeed, FString Effect, float EffectChance, float EffectDuration);
+	void SetAllText(FString Name, int Capacity, float ReloadSpeed, FString Effect, float EffectChance, float EffectDuration, int AttachmentScore);
 	
 };

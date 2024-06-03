@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/Border.h"
 #include "BarrelDisplay.generated.h"
 
 enum class EFireMode : uint8;
@@ -32,7 +33,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText" ,meta = (BindWidget))
 	UTextBlock* TXT_BurstCount = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText" ,meta = (BindWidget))
+	UTextBlock* TXT_AttachmentValue = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText" ,meta = (BindWidget))
+	UBorder* BDR_Color = nullptr;
+
 	UFUNCTION()
-	void SetAllText(FString BarrelName, float FireRate, float Damage, EFireMode FireMode, float BurstSpeed, int BurstCount);
+	void SetAllText(FString BarrelName, float FireRate, float Damage, EFireMode FireMode, float BurstSpeed, int BurstCount, int ScaleValue);
 	FString GetFireModeString(EFireMode FireMode) const;
 };

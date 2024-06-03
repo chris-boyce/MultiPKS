@@ -28,6 +28,7 @@ void AMagazine::BeginPlay()
 
 void AMagazine::AdjustScaleValue(int Scale)
 {
+	AttachmentScaleValue = Scale;
 	float ScaleAlpha = static_cast<float>(Scale) / 100.0f;
 	CurrentAmmo = FMath::Lerp(CurrentAmmoRange.X, CurrentAmmoRange.Y, ScaleAlpha);
 	MaxAmmo = FMath::Lerp(MaxAmmoRange.X, MaxAmmoRange.Y, ScaleAlpha);

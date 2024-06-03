@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "WeaponDisplay.generated.h"
 
+class UTextBlock;
 class UBarrelDisplay;
 class UScopeDisplay;
 class UMagDisplay;
@@ -31,6 +32,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText")
 	TObjectPtr<UGripDisplay> BP_GripDisplay = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText", meta = (BindWidget))
+	UTextBlock* TXT_GunValue = nullptr;
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void StartRemoveFromParent();

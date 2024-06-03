@@ -21,6 +21,12 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditDefaultsOnly, Category="Scope")
+	FString AttachmentName = "Scope";
+
+	UPROPERTY(VisibleAnywhere, Category="Scope")
+	int AttachmentValue = 0;
+
 	UPROPERTY(EditDefaultsOnly, Category="Scope|ADS")
 	FVector2D ADSSpeedRange;
 	

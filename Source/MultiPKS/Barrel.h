@@ -31,6 +31,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* StaticMeshComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category="Barrel")
+	FString AttachmentName = "Barrel";
+
+	UPROPERTY(VisibleAnywhere, Category="Barrel")
+	int AttachementScale = 0;
 	
 	virtual void Tick(float DeltaTime) override;
 

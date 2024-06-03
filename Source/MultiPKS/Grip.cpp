@@ -41,6 +41,7 @@ void AGrip::ChangePlayerSpeed(AThirdPersonCharacter* Player, bool isADSed)
 void AGrip::AdjustScaleValue(int Scale)
 {
 	float ScaleAlpha = static_cast<float>(Scale) / 100.0f;
+	AttachmentValue = Scale;
 	UnADSMoveSpeed = FMath::Lerp(UnADSMoveSpeedRange.X, UnADSMoveSpeedRange.Y, ScaleAlpha);
 	UnADSMoveSpeed = FMath::Lerp(ADSedMoveSpeedRange.X, ADSedMoveSpeedRange.Y, ScaleAlpha);
 	RecoilAmount = FMath::Lerp(RecoilAmountRange.X, RecoilAmountRange.Y, ScaleAlpha);

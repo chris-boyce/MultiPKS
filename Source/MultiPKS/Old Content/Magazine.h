@@ -41,6 +41,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+
+	UPROPERTY(EditDefaultsOnly, Category="Mag")
+	FString AttachmentName = "Magazine";
+	
 	UPROPERTY(EditDefaultsOnly, Category="Mag|Ammo")
 	FIntPoint CurrentAmmoRange;
 	

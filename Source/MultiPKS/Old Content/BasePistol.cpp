@@ -160,11 +160,12 @@ void ABasePistol::HighlightObject(AThirdPersonCharacter* InteractingCharacter)
 			if (WeaponDisplayWidget)
 			{
 				WeaponDisplayWidget->AddToViewport();
-				WeaponDisplayWidget->BP_MagDisplay->SetAllText(MagazineComponent->GetName(), FString("TBA"), MagazineComponent->MaxAmmo, MagazineComponent->ReloadSpeed, FString("TBA"), MagazineComponent->ElementalPercentageChance, MagazineComponent->ElementalEffectTime );
-				WeaponDisplayWidget->BP_ScopeDisplay->SetAllText(ScopeComponent->GetName(), ScopeComponent->ADSSpeed, ScopeComponent->FOVChange);
-				WeaponDisplayWidget->BP_BarrelDisplay->SetAllText(BarrelComponent->GetName(), BarrelComponent->FireRate, BarrelComponent->BulletDamage, BarrelComponent->FireMode, BarrelComponent->BurstSpeed, BarrelComponent->BurstCount);
-				WeaponDisplayWidget->BP_MuzzleDisplay->SetAllText(MuzzleComponent->GetName(), MuzzleComponent->FireSound.SoundLevel, MuzzleComponent->BulletVelocity);
-				WeaponDisplayWidget->BP_GripDisplay->SetAllText(GripComponent->GetName(), GripComponent->UnADSMoveSpeed, GripComponent->ADSedMoveSpeed, GripComponent->RecoilAmount);
+				WeaponDisplayWidget->TXT_GunValue->SetText(FText::AsNumber(ValueData[0]));
+				WeaponDisplayWidget->BP_MagDisplay->SetAllText(MagazineComponent->AttachmentName, MagazineComponent->MaxAmmo, MagazineComponent->ReloadSpeed,FString("TBA"), MagazineComponent->ElementalPercentageChance, MagazineComponent->ElementalEffectTime, MagazineComponent->AttachmentScaleValue);
+				WeaponDisplayWidget->BP_ScopeDisplay->SetAllText(ScopeComponent->AttachmentName, ScopeComponent->ADSSpeed, ScopeComponent->FOVChange, ScopeComponent->AttachmentValue);
+				WeaponDisplayWidget->BP_BarrelDisplay->SetAllText(BarrelComponent->AttachmentName, BarrelComponent->FireRate, BarrelComponent->BulletDamage, BarrelComponent->FireMode, BarrelComponent->BurstSpeed, BarrelComponent->BurstCount, BarrelComponent->AttachementScale);
+				WeaponDisplayWidget->BP_MuzzleDisplay->SetAllText(MuzzleComponent->AttachmentName, MuzzleComponent->FireSound.SoundLevel, MuzzleComponent->BulletVelocity, MuzzleComponent->AttachmentValue);
+				WeaponDisplayWidget->BP_GripDisplay->SetAllText(GripComponent->AttachmentName, GripComponent->UnADSMoveSpeed, GripComponent->ADSedMoveSpeed, GripComponent->RecoilAmount, GripComponent->AttachmentValue);
 				WeaponDisplayOnScreen = true;
 			}
 		}

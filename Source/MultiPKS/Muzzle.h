@@ -34,13 +34,22 @@ class MULTIPKS_API AMuzzle : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
+public:
+	
+	
 	AMuzzle();
 
 protected:
 	virtual void BeginPlay() override;
 
-public:	
+public:
+
+	UPROPERTY(EditDefaultsOnly, Category="Muzzle")
+	FString AttachmentName = "Muzzle";
+
+	UPROPERTY(VisibleAnywhere, Category="Muzzle")
+	int AttachmentValue = 0;
+	
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")

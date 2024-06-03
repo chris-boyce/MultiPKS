@@ -72,6 +72,7 @@ void AScope::ToggleCameraPosition(UCameraComponent* PlayerCamera, bool isADSed)
 void AScope::AdjustScaleValue(int Scale)
 {
 	float ScaleAlpha = static_cast<float>(Scale) / 100.0f;
+	AttachmentValue = Scale;
 	
 	ADSSpeed = FMath::Lerp(ADSSpeedRange.X, ADSSpeedRange.Y, ScaleAlpha);
 }

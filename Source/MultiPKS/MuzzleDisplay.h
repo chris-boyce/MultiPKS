@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/Border.h"
 #include "MuzzleDisplay.generated.h"
 
 enum class ESoundLevel : uint8;
@@ -24,8 +25,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText", meta = (BindWidget))
 	UTextBlock* TXT_BulletVelocity;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText", meta = (BindWidget))
+	UTextBlock* TXT_AttachmentValue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetText", meta = (BindWidget))
+	UBorder* BDR_Color;
+
 	UFUNCTION()
-	void SetAllText(FString MuzzleName, ESoundLevel SoundLevel, float BulletVelocity);
+	void SetAllText(FString MuzzleName, ESoundLevel SoundLevel, float BulletVelocity, int AttachmentValue);
 
 	FString GetSoundLevelString(ESoundLevel SoundLevel) const;
 };
