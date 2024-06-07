@@ -9,6 +9,8 @@
 AMuzzle::AMuzzle()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
+	RootComponent = StaticMeshComponent;
 	bReplicates = true;
 
 }

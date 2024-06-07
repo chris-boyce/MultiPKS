@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SettingsUtility.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
 #include "Components/EditableTextBox.h"
@@ -24,25 +25,34 @@ class MULTIPKS_API UInGameSettingDisplay : public UUserWidget
 	UPROPERTY(meta = (BindWidget))
 	USpinBox* Bar_Sen;
 	
+	USettingsUtility* SettingsUtility;
+
 	UFUNCTION()
 	void SenChangeBar(float InValue);
 
 	UFUNCTION()
 	void SenChangeText(const FText& Text);
+
+	UPROPERTY(meta = (BindWidget))
+	UEditableTextBox* INPUT_ScopeSEN;
+
+	UPROPERTY(meta = (BindWidget))
+	USpinBox* Bar_ScopedSen;
+	
+	UFUNCTION()
+	void SenScopeChangeBar(float InValue);
+
+	UFUNCTION()
+	void SenScopeChangeText(const FText& Text);
 	
 	UPROPERTY()
 	float CurrentSense = 1.0f;
 
+	UPROPERTY()
+	float ScopedPercentage = 100.0f;
+
 	/* --- Open and Close Of Menu --- */
 
-	UFUNCTION()
-	void ResChangeDown();
-
-	UFUNCTION()
-	void ResChangeUp();
-
-	UFUNCTION()
-	void ChangeRes();
 	
 	virtual void NativeConstruct() override;
 
@@ -52,24 +62,13 @@ class MULTIPKS_API UInGameSettingDisplay : public UUserWidget
 	
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
 	UWidgetAnimation* IntroAnim;
-
-	/* --- Resolution --- */
-
-	UPROPERTY(meta = (BindWidget))
-	UButton* BTN_ResDown;
-
-	UPROPERTY(meta = (BindWidget))
-	UButton* BTN_ResUp;
-
-	UPROPERTY(meta = (BindWidget))
-	UTextBlock* TXT_Res;
-
-	int CurrentResSelection = 0;
-
-	TArray<FVector2D> ResolutionVector;
-
+	
 	UPROPERTY(meta = (BindWidget))
 	UButton* BTN_Disconnect;
+public:
+	float GetCurrentSense() const {return  CurrentSense;}
+	
+	float GetScopedSensePercentage() const {return  ScopedPercentage;}
 
 	
 

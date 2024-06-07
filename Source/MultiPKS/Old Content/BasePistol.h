@@ -146,6 +146,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="Seed");
 	FString GunData;
 
+	UFUNCTION()
+	void HideWeaponModel(bool shouldHide);
+
 private:
 	UPROPERTY(EditAnywhere, Category="Singleton", meta=(AllowPrivateAccess = "true"))
 	TSubclassOf<UGunDataSingleton> GunDataSingletonClass;
@@ -172,6 +175,9 @@ private:
 	TArray<int> TransformedValueData;
 
 	int ExponentialValueShift(int GunBaseValue, int AttachmentBaseValue);
+
+	
+	
 
 
 	

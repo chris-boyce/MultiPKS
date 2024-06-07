@@ -3,6 +3,7 @@
 
 #include "GripDisplay.h"
 
+#include "UColorUtility.h"
 #include "Components/TextBlock.h"
 
 void UGripDisplay::SetAllText(FString GripName, float UnADSMovementSpeed, float ADSMovementSpeed, float RecoilAmount, int AttachmentValue)
@@ -13,35 +14,5 @@ void UGripDisplay::SetAllText(FString GripName, float UnADSMovementSpeed, float 
 	TXT_RecoilAmount->SetText(FText::FromString(FString::Printf(TEXT("%.2f°"), RecoilAmount)));
 	TXT_AttachmentValue->SetText(FText::AsNumber(AttachmentValue));
 
-	FLinearColor NewColor;
-
-	if (AttachmentValue >= 0 && AttachmentValue <= 10)
-	{
-		NewColor = FLinearColor(1.0f, 0.0f, 0.0f, 0.8f); 
-	}
-	else if (AttachmentValue >= 11 && AttachmentValue <= 25)
-	{
-		NewColor = FLinearColor(1.0f, 0.41f, 0.71f, 0.8f); 
-	}
-	else if (AttachmentValue >= 26 && AttachmentValue <= 50)
-	{
-		NewColor = FLinearColor(0.5f, 0.0f, 0.5f, 0.8f);
-	}
-	else if (AttachmentValue >= 51 && AttachmentValue <= 75)
-	{
-		NewColor = FLinearColor(0.0f, 1.0f, 1.0f, 0.8f);
-	}
-	else if (AttachmentValue >= 76 && AttachmentValue <= 100)
-	{
-		NewColor = FLinearColor(0.5f, 0.5f, 0.5f, 0.8f);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Value is out of range"));
-		return;
-	}
-
-	FSlateBrush Brush = BDR_Color->Background;
-	Brush.TintColor = FSlateColor(NewColor);
-	BDR_Color->SetBrush(Brush);
+	UUColorUtility::SetBorderColorBasedOnValue(BDR_Color, AttachmentValue);
 }

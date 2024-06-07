@@ -7,6 +7,7 @@
 #include "HealthBarDisplay.h"
 #include "InGameSettingDisplay.h"
 #include "PlayerAmmoHUD.h"
+#include "SettingsUtility.h"
 #include "GameFramework/Character.h"
 #include "Old Content/BasePistol.h"
 #include "ThirdPersonCharacter.generated.h"
@@ -77,6 +78,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* OpenMenuAction;
 	
+	USettingsUtility* SettingsUtility;
+
 	void Move(const FInputActionValue& Value);
 	
 	void Look(const FInputActionValue& Value);
@@ -254,7 +257,15 @@ public:
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="UI")
 	UInGameSettingDisplay* InGameSettingDisplay;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	float LookSensitivity = 1.0f;
 
+	UPROPERTY()
+	float CurrentLookSensitivity = 1.0f;
+
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	void SetLookSensitivity(float NewSensitivity);
 	
 	
 

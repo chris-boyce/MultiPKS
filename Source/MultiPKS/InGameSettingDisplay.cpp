@@ -3,49 +3,14 @@
 
 #include "InGameSettingDisplay.h"
 
+#include "SettingsUtility.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Misc/DefaultValueHelper.h"
 
 
-void UInGameSettingDisplay::ResChangeDown()
-{
-	CurrentSense = CurrentSense - 1;
-	TXT_Res->SetText(FText::Format(FText::FromString("{0} x {1}"), FText::AsNumber(ResolutionVector[CurrentResSelection].X), FText::AsNumber(ResolutionVector[CurrentResSelection].Y)));
-	ChangeRes();	
-	UE_LOG(LogTemp, Error, TEXT("Res Going Down"));
-	
-}
-
-void UInGameSettingDisplay::ResChangeUp()
-{
-	CurrentSense = CurrentSense + 1;
-	TXT_Res->SetText(FText::Format(FText::FromString("{0} x {1}"), FText::AsNumber(ResolutionVector[CurrentResSelection].X), FText::AsNumber(ResolutionVector[CurrentResSelection].Y)));
-	ChangeRes();	
-	UE_LOG(LogTemp, Error, TEXT("Res Going Up"));
-	
-}
-
-void UInGameSettingDisplay::ChangeRes()
-{
-	UE_LOG(LogTemp, Error, TEXT("Trying to Change Res"));
-	UGameUserSettings* UserSettings = GEngine->GetGameUserSettings();
-	
-	if (UserSettings)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Has Changed Res"));
-		FIntPoint Resolution(ResolutionVector[CurrentResSelection].X, ResolutionVector[CurrentResSelection].Y);
-		UserSettings->SetScreenResolution(Resolution);
-		UserSettings->ApplySettings(false);
-	}
-}
-
 void UInGameSettingDisplay::NativeConstruct()
 {
 	Super::NativeConstruct();
-	ResolutionVector.Add(FVector2D(1280, 720));
-	ResolutionVector.Add(FVector2D(1280, 720));
-	ResolutionVector.Add(FVector2D(1600, 900));
-	ResolutionVector.Add(FVector2D(2560, 1440));
 	
 	if (IntroAnim)
 	{
@@ -59,21 +24,27 @@ void UInGameSettingDisplay::NativeConstruct()
 	{
 		Bar_Sen->OnValueChanged.AddDynamic(this, &UInGameSettingDisplay::SenChangeBar);
 	}
-	if(BTN_ResDown)
+	if(INPUT_ScopeSEN)
 	{
-		BTN_ResDown->OnClicked.AddDynamic(this, &UInGameSettingDisplay::ResChangeDown);
+		INPUT_ScopeSEN->OnTextChanged.AddDynamic(this, &UInGameSettingDisplay::SenScopeChangeText);
 	}
-	if(BTN_ResUp)
+	if(Bar_ScopedSen)
 	{
-		BTN_ResUp->OnClicked.AddDynamic(this, &UInGameSettingDisplay::ResChangeUp);
+		Bar_ScopedSen->OnValueChanged.AddDynamic(this, &UInGameSettingDisplay::SenScopeChangeBar);
 	}
+	SettingsUtility = NewObject<USettingsUtility>();
+	Bar_Sen->SetValue(SettingsUtility->LoadSensitivitySetting());
+	INPUT_SEN->SetText(FText::AsNumber(SettingsUtility->LoadSensitivitySetting()));
+	Bar_ScopedSen->SetValue(SettingsUtility->LoadScopeSensitivitySetting());
+	INPUT_ScopeSEN->SetText(FText::AsNumber(SettingsUtility->LoadScopeSensitivitySetting()));
 
 	
 }
 
 void UInGameSettingDisplay::NativeDestruct()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ClosedMenu"));Super::NativeDestruct();
+	UE_LOG(LogTemp, Warning, TEXT("ClosedMenu"));
+	Super::NativeDestruct();
 }
 
 void UInGameSettingDisplay::SenChangeText(const FText& Text) /* Called When The TEXT input is changed */
@@ -89,6 +60,26 @@ void UInGameSettingDisplay::SenChangeText(const FText& Text) /* Called When The 
 		INPUT_SEN->SetText(FText::AsNumber(CurrentSense));
 	}
 	
+}
+
+void UInGameSettingDisplay::SenScopeChangeBar(float InValue)
+{
+	ScopedPercentage = InValue;
+	INPUT_ScopeSEN->SetText(FText::AsNumber(InValue));
+}
+
+void UInGameSettingDisplay::SenScopeChangeText(const FText& Text)
+{
+	float NewSense;
+	if (FDefaultValueHelper::ParseFloat(Text.ToString(), NewSense))
+	{
+		ScopedPercentage = NewSense;
+		Bar_ScopedSen->SetValue(ScopedPercentage);
+	}
+	else
+	{
+		INPUT_ScopeSEN->SetText(FText::AsNumber(ScopedPercentage));
+	}
 }
 
 void UInGameSettingDisplay::SenChangeBar(float InValue)

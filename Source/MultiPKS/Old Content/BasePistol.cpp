@@ -256,6 +256,14 @@ int ABasePistol::ExponentialValueShift(int GunBaseValue, int AttachmentBaseValue
 	return RoundedTransformValue;
 }
 
+void ABasePistol::HideWeaponModel(bool shouldHide)
+{
+	BarrelComponent->StaticMeshComponent->SetVisibility(shouldHide);
+	//MuzzleComponent->StaticMeshComponent->SetVisibility(shouldHide);
+}
+
+
+
 
 void ABasePistol::SetMagDisplay(AThirdPersonCharacter* InteractingCharacter)
 {

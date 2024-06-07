@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "Grip.h"
 #include "Scope.h"
+#include "SettingsUtility.h"
 #include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -46,6 +47,8 @@ void AThirdPersonCharacter::BeginPlay()
 	{
 		InteractComponent->DropWeapon.AddDynamic(this, &AThirdPersonCharacter::HandleDropWeapon);
 	}
+	SettingsUtility = NewObject<USettingsUtility>();
+	LookSensitivity = SettingsUtility->LoadSensitivitySetting();
 	
 }
 
@@ -67,6 +70,9 @@ void AThirdPersonCharacter::Look(const FInputActionValue& Value)
 		return;
 	}
 	FVector2D LookInput = Value.Get<FVector2D>();
+
+	LookInput *= CurrentLookSensitivity;
+	
 	AddControllerYawInput(LookInput.X);
 	AddControllerPitchInput(LookInput.Y);
 }
@@ -163,7 +169,7 @@ void AThirdPersonCharacter::HandleADS()
 			isADSed = false;
 			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, isADSed);
 			GetMesh()->SetOwnerNoSee(false);
-			PlayerWeapon[CurrentlySelectedWeapon]->MainMesh->SetOwnerNoSee(false);
+			PlayerWeapon[CurrentlySelectedWeapon]->HideWeaponModel(true);
 		}
 		else
 		{
@@ -172,7 +178,7 @@ void AThirdPersonCharacter::HandleADS()
 			SetADS(false);
 			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, !isADSed);
 			GetMesh()->SetOwnerNoSee(false);
-			PlayerWeapon[CurrentlySelectedWeapon]->MainMesh->SetOwnerNoSee(false);
+			PlayerWeapon[CurrentlySelectedWeapon]->HideWeaponModel(true);
 		}
 	}
 	else
@@ -180,21 +186,23 @@ void AThirdPersonCharacter::HandleADS()
 		PlayerWeapon[CurrentlySelectedWeapon]->GripComponent->ChangePlayerSpeed(this, isADSed);
 		if(HasAuthority())
 		{
+			CurrentLookSensitivity = LookSensitivity * (InGameSettingDisplay->GetScopedSensePercentage() / 100);
 			GetMesh()->SetOwnerNoSee(true);
 			Server_ToggleCameraPosition(MainCamera, isADSed);
 			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
 			isADSed = true;
 			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, isADSed);
-			PlayerWeapon[CurrentlySelectedWeapon]->MainMesh->SetOwnerNoSee(true);
+			PlayerWeapon[CurrentlySelectedWeapon]->HideWeaponModel(false);
 		}
 		else
 		{
+			CurrentLookSensitivity = LookSensitivity * (InGameSettingDisplay->GetScopedSensePercentage() / 100);
 			GetMesh()->SetOwnerNoSee(true);
 			Server_ToggleCameraPosition(MainCamera, isADSed); /* Please Leave In This Order */
 			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleCameraPosition(MainCamera, isADSed);
 			SetADS(true);
 			PlayerWeapon[CurrentlySelectedWeapon]->ScopeComponent->ToggleScopeVisual(this, !isADSed);
-			PlayerWeapon[CurrentlySelectedWeapon]->MainMesh->SetOwnerNoSee(true);
+			PlayerWeapon[CurrentlySelectedWeapon]->HideWeaponModel(false);
 		}
 		
 	}
@@ -264,12 +272,20 @@ void AThirdPersonCharacter::HandleOpenMenu()
 	if(isMenuOpen)
 	{
 		InGameSettingDisplay->AddToViewport();
+		LookSensitivity = InGameSettingDisplay->GetCurrentSense();
+		CurrentLookSensitivity = LookSensitivity;
+		SettingsUtility->SaveSensitivitySetting(InGameSettingDisplay->GetCurrentSense());
+		SettingsUtility->SaveScopeSensitivitySetting(InGameSettingDisplay->GetScopedSensePercentage());
 		PC->bShowMouseCursor = true;
 		CanPerformAction = false;
 	}
 	else
 	{
 		InGameSettingDisplay->RemoveFromParent();
+		LookSensitivity = InGameSettingDisplay->GetCurrentSense();
+		CurrentLookSensitivity = LookSensitivity;
+		SettingsUtility->SaveSensitivitySetting(InGameSettingDisplay->GetCurrentSense());
+		SettingsUtility->SaveScopeSensitivitySetting(InGameSettingDisplay->GetScopedSensePercentage());
 		PC->bShowMouseCursor = false;
 		CanPerformAction = true;
 	}
@@ -504,6 +520,11 @@ void AThirdPersonCharacter::DetailedTakeDamage(float DamageAmount, FVector HitLo
 float AThirdPersonCharacter::GetHealth() const
 {
 	return CurrentHealth;
+}
+
+void AThirdPersonCharacter::SetLookSensitivity(float NewSensitivity)
+{
+	LookSensitivity = NewSensitivity;
 }
 
 void AThirdPersonCharacter::GetAllAttachedActorsRecursively(AActor* ParentActor, TArray<AActor*>& OutActors)

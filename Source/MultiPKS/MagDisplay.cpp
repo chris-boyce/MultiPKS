@@ -1,5 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "MagDisplay.h"
+
+#include "UColorUtility.h"
 #include "Components/TextBlock.h"
 #include "Internationalization/Text.h"
 
@@ -29,36 +31,6 @@ void UMagDisplay::SetAllText(FString Name, int Capacity, float ReloadSpeed, FStr
 	FormattedText = FText::Format(NSLOCTEXT("YourContext", "YourKey", "{0}s"), FText::AsNumber(EffectDuration, &NumberFormatOptions));
 	TXT_ElementDuration->SetText(FormattedText);
 
-	FLinearColor NewColor;
-
-	if (AttachmentScore >= 0 && AttachmentScore <= 10)
-	{
-		NewColor = FLinearColor(1.0f, 0.0f, 0.0f, 0.8f); 
-	}
-	else if (AttachmentScore >= 11 && AttachmentScore <= 25)
-	{
-		NewColor = FLinearColor(1.0f, 0.41f, 0.71f, 0.8f); 
-	}
-	else if (AttachmentScore >= 26 && AttachmentScore <= 50)
-	{
-		NewColor = FLinearColor(0.5f, 0.0f, 0.5f, 0.8f);
-	}
-	else if (AttachmentScore >= 51 && AttachmentScore <= 75)
-	{
-		NewColor = FLinearColor(0.0f, 1.0f, 1.0f, 0.8f);
-	}
-	else if (AttachmentScore >= 76 && AttachmentScore <= 100)
-	{
-		NewColor = FLinearColor(0.5f, 0.5f, 0.5f, 0.8f);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Value is out of range"));
-		return;
-	}
-
-	FSlateBrush Brush = BDR_Color->Background;
-	Brush.TintColor = FSlateColor(NewColor);
-	BDR_Color->SetBrush(Brush);
+	UUColorUtility::SetBorderColorBasedOnValue(BDR_Color, AttachmentScore);
 	
 }

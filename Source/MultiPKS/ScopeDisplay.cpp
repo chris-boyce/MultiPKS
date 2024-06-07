@@ -2,7 +2,7 @@
 
 
 #include "ScopeDisplay.h"
-
+#include "UColorUtility.h"
 #include "Components/TextBlock.h"
 #include "Math/UnrealMathUtility.h"
 
@@ -34,38 +34,8 @@ void UScopeDisplay::SetAllText(FString Name, float ADSSpeed, float FOV, int Atta
 	
 	FormattedText = FText::Format(NSLOCTEXT("YourContext", "YourKey", "{0}x"), FText::AsNumber(MagnificationCalculation(FOV), &NumberFormatOptions));
 	TXT_ZoomAmount->SetText(FormattedText);
-
-	FLinearColor NewColor;
-
-	if (AttachmentValue >= 0 && AttachmentValue <= 10)
-	{
-		NewColor = FLinearColor(1.0f, 0.0f, 0.0f, 0.8f); 
-	}
-	else if (AttachmentValue >= 11 && AttachmentValue <= 25)
-	{
-		NewColor = FLinearColor(1.0f, 0.41f, 0.71f, 0.8f); 
-	}
-	else if (AttachmentValue >= 26 && AttachmentValue <= 50)
-	{
-		NewColor = FLinearColor(0.5f, 0.0f, 0.5f, 0.8f);
-	}
-	else if (AttachmentValue >= 51 && AttachmentValue <= 75)
-	{
-		NewColor = FLinearColor(0.0f, 1.0f, 1.0f, 0.8f);
-	}
-	else if (AttachmentValue >= 76 && AttachmentValue <= 100)
-	{
-		NewColor = FLinearColor(0.5f, 0.5f, 0.5f, 0.8f);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Value is out of range"));
-		return;
-	}
-
-	FSlateBrush Brush = BDR_Color->Background;
-	Brush.TintColor = FSlateColor(NewColor);
-	BDR_Color->SetBrush(Brush);
+	UUColorUtility::SetBorderColorBasedOnValue(BDR_Color, AttachmentValue);
+	
 }
 
 
