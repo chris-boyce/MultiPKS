@@ -14,8 +14,6 @@ ABullet::ABullet()
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	CollisionComp->InitSphereRadius(5.0f);
 	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
-
-
 	CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	CollisionComp->CanCharacterStepUpOn = ECB_No;
 	
@@ -41,6 +39,10 @@ void ABullet::BeginPlay()
 void ABullet::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if(isGotBulletMod)
+	{
+		BulletMod->HandleMovement();
+	}
 }
 
 void ABullet::InitializeVariables(float BulletDamage, float BulletVelocity)
@@ -48,6 +50,13 @@ void ABullet::InitializeVariables(float BulletDamage, float BulletVelocity)
 	Damage = BulletDamage;
 	ProjectileMovement->InitialSpeed = BulletVelocity;
 	ProjectileMovement->MaxSpeed = BulletVelocity;
+
+	if(BulletModClasses)
+	{
+		isGotBulletMod = true;
+		BulletMod = Cast<UBulletBaseComponent>(AddComponentByClass(BulletModClasses,false, FTransform(FRotator::ZeroRotator, FVector::ZeroVector, FVector(1.0, 1.0, 1.0)), false ));
+	}
+	
 }
 
 void ABullet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -56,19 +65,31 @@ void ABullet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	DOREPLIFETIME(ABullet, Damage);
 }
 
-void ABullet::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved,
-                        FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+void ABullet::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+	
 	if(HasAuthority())
 	{
-		if(auto temp = Cast<IDamageable>(Other))
+		if(isGotBulletMod)
 		{
-			temp->DetailedTakeDamage(Damage, Hit.Location);
-			//DamageText(DamageAmount, Hit.Location);
-			UE_LOG(LogTemp, Warning, TEXT("Has Been Hit : %s"), *Hit.BoneName.ToString());
+			BulletMod->HandleImpact(Hit);
+		}
+		else
+		{
+			DoDamage(Other, Hit);
 		}
 		
+		
+	}
+}
+
+void ABullet::DoDamage(AActor* Other , const FHitResult& Hit)
+{
+	if(auto temp = Cast<IDamageable>(Other))
+	{
+		temp->DetailedTakeDamage(Damage, Hit.Location);
+		UE_LOG(LogTemp, Warning, TEXT("Has Been Hit : %s"), *Hit.BoneName.ToString());
 	}
 }
 

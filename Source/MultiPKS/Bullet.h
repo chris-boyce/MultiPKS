@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BulletBaseComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -29,19 +30,30 @@ public:
 	UPROPERTY(Replicated)
 	float Damage = 0;
 
+	virtual void NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 
-	
+
+	void DoDamage(AActor* Other, const FHitResult& Hit);
 private:
 
 	/** Sphere collision component */
 	UPROPERTY(VisibleDefaultsOnly, Category=Projectile)
 	USphereComponent* CollisionComp;
+
+	UPROPERTY(EditAnywhere, Category="BulletMod")
+	TSubclassOf<UBulletBaseComponent> BulletModClasses;
+
+	UPROPERTY(VisibleAnywhere, Category="BulletMod")
+	UBulletBaseComponent* BulletMod;
+
+	UPROPERTY(VisibleAnywhere, Category="BulletMod")
+	bool isGotBulletMod = false;
 	
 	/** Projectile movement component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* ProjectileMovement;
 
-	virtual void NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
+	
 
 	
 
