@@ -8,6 +8,7 @@
 #include "SettingsUtility.h"
 #include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Old Content/InteractComp.h"
 #include "Net/UnrealNetwork.h"
@@ -49,6 +50,15 @@ void AThirdPersonCharacter::BeginPlay()
 	}
 	SettingsUtility = NewObject<USettingsUtility>();
 	LookSensitivity = SettingsUtility->LoadSensitivitySetting();
+
+	SlideSpeedMultiplier = 1.57f;  // Adjust as needed
+	SlideFriction = 0.1f;         // Adjust as needed
+	SlideDuration = 1.0f;         // Adjust as needed
+	SlideHeight = 44.0f;          // Adjust as needed, usually half of standing height
+	MinSlideSpeed = 450.f;        // Minimum speed to initiate slide
+	MinForwardVelocityToSlide = 300.f;  // Minimum forward speed component to initiate slide
+	isSliding = false;
+	OriginalHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
 	
 }
 
@@ -305,6 +315,54 @@ void AThirdPersonCharacter::HideWeapons()
 	}
 }
 
+void AThirdPersonCharacter::HandleSlide()
+{
+	FVector ForwardVector = GetActorForwardVector();
+	FVector Velocity = GetVelocity();
+	float ForwardVelocityDot = FVector::DotProduct(ForwardVector, Velocity);
+
+	if(CanPerformAction == false)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Cannot perform action: Movement action is currently disabled"));
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Handle Is Called"));
+
+	if (ForwardVelocityDot <= MinForwardVelocityToSlide)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Forward velocity dot product too low: %f, required minimum: %f"), ForwardVelocityDot, MinForwardVelocityToSlide);
+		return;
+	}
+
+	if (Velocity.Size() < MinSlideSpeed)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Velocity magnitude too low: %f, required minimum: %f"), Velocity.Size(), MinSlideSpeed);
+		return;
+	}
+	
+	if (!isSliding)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Slide Params Reached"));
+		isSliding = true;
+		GetCharacterMovement()->MaxWalkSpeed *= SlideSpeedMultiplier;  // Increase the speed temporarily
+		GetCharacterMovement()->BrakingFrictionFactor = SlideFriction;  // Reduce friction to slide
+		OriginalHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+		//GetCapsuleComponent()->SetCapsuleHalfHeight(SlideHeight);  // Reduce capsule height to simulate crouching
+		FTimerHandle UnusedHandle;
+		GetWorldTimerManager().SetTimer(UnusedHandle, this, &AThirdPersonCharacter::StopSlide, SlideDuration, false);
+	}
+	
+}
+
+void AThirdPersonCharacter::StopSlide()
+{
+	isSliding = false;
+	GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedMultiplier;  // Reset speed
+	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;  // Reset friction
+	//GetCapsuleComponent()->SetCapsuleHalfHeight(OriginalHeight);  // Reset capsule height
+}
+
 void AThirdPersonCharacter::HandleDropWeapon(AThirdPersonCharacter* PlayerDropping)
 {
 	if(CanPerformAction == false)
@@ -367,6 +425,8 @@ void AThirdPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleReload);
 
 		EnhancedInputComponent->BindAction(OpenMenuAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleOpenMenu);
+
+		EnhancedInputComponent->BindAction(SlideAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleSlide);
 	}
 	else
 	{

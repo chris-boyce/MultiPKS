@@ -15,7 +15,7 @@ class MULTIPKS_API UPlayerAnimInstance : public UAnimInstance
 
 public:
 	UFUNCTION(BlueprintCallable)
-	UPoseSearchDatabase* ChoosePoseDatabase(bool isFalling, bool isCrouch, bool isArmed);
+	UPoseSearchDatabase* ChoosePoseDatabase(bool isFalling, bool isCrouch, bool isArmed, bool isSliding);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="PoseDataBase")
 	UPoseSearchDatabase* UnarmedCrouch;
@@ -35,6 +35,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="PoseDataBase")
 	UPoseSearchDatabase* ArmedCrouch;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="PoseDataBase")
+	UPoseSearchDatabase* UnarmedSlide;
 	
 	
 };

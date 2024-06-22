@@ -4,8 +4,12 @@
 #include "PlayerAnimInstance.h"
 
 
-UPoseSearchDatabase* UPlayerAnimInstance::ChoosePoseDatabase(bool isFalling, bool isCrouch, bool isArmed)
+UPoseSearchDatabase* UPlayerAnimInstance::ChoosePoseDatabase(bool isFalling, bool isCrouch, bool isArmed, bool isSliding)
 {
+	if(isSliding)
+	{
+		return UnarmedSlide;
+	}
 	if(isFalling && !isArmed) 
 	{
 		return UnarmedJump;

@@ -77,8 +77,21 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* OpenMenuAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SlideAction;
 	
 	USettingsUtility* SettingsUtility;
+
+	/* ---- Slide Vars ----- */
+	float SlideSpeedMultiplier;
+	float SlideFriction;
+	float SlideDuration;
+	float SlideHeight;
+	float MinSlideSpeed;
+	float MinForwardVelocityToSlide;
+	
+	float OriginalHeight;
 
 	void Move(const FInputActionValue& Value);
 	
@@ -108,6 +121,10 @@ private:
 
 	void HideWeapons();
 
+	void HandleSlide();
+
+	void StopSlide();
+
 	
 
 public:
@@ -132,6 +149,9 @@ public:
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	bool isADSed = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool isSliding;
 
 	UFUNCTION()
 	bool GetIsADS() {return isADSed;}
