@@ -3,7 +3,6 @@
 
 #include "BulletSuctionComp.h"
 
-#include "BaseEnemy.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 UBulletSuctionComp::UBulletSuctionComp()
@@ -23,5 +22,10 @@ void UBulletSuctionComp::HandleImpact(const FHitResult& HitResult)
 
 void UBulletSuctionComp::ApplySuction(const FVector& ImpactPoint)
 {
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = GetOwner();  
+	SpawnParams.Instigator = GetOwner()->GetInstigator();
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	
+	auto temp = GetOwner()->GetWorld()->SpawnActor<ABlackhole>(BlackholeClass, ImpactPoint, FRotator::ZeroRotator, SpawnParams);
 }

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Blackhole.h"
 #include "BulletBaseComponent.h"
 #include "BulletSuctionComp.generated.h"
 
@@ -21,5 +22,11 @@ public:
 	virtual void HandleImpact(const FHitResult& HitResult) override;
 
 	void ApplySuction(const FVector& ImpactPoint);
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ABlackhole> BlackholeClass;
+
+	UPROPERTY(VisibleAnywhere)
+	ABlackhole* Blackhole;
 	
 };

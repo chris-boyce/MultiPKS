@@ -23,7 +23,7 @@ void ABlackhole::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	float Radius = 500.0f; 
-	float Strength = 500.0f; 
+	float Strength = 1000.0f; 
 	
 	TArray<FHitResult> HitResults;
 	FCollisionShape Sphere = FCollisionShape::MakeSphere(Radius);
