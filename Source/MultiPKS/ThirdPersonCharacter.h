@@ -6,6 +6,7 @@
 #include "Damageable.h"
 #include "HealthBarDisplay.h"
 #include "InGameSettingDisplay.h"
+#include "NiagaraComponent.h"
 #include "PlayerAmmoHUD.h"
 #include "SettingsUtility.h"
 #include "GameFramework/Character.h"
@@ -80,6 +81,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* SlideAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* BlinkAction;
 	
 	USettingsUtility* SettingsUtility;
 
@@ -90,8 +94,17 @@ private:
 	float SlideHeight;
 	float MinSlideSpeed;
 	float MinForwardVelocityToSlide;
-	
 	float OriginalHeight;
+
+	UPROPERTY(EditAnywhere, Category = "Teleport Dash")
+	float DashDistance = 2500.0f;  // Distance of the dash in Unreal units
+
+	UPROPERTY(EditAnywhere, Category = "Teleport Dash")
+	float DashCooldown = 5.0f;  // Cooldown in seconds
+
+	bool bCanDash = true;
+
+	
 
 	void Move(const FInputActionValue& Value);
 	
@@ -125,9 +138,17 @@ private:
 
 	void StopSlide();
 
+	void ResetDash();
+	
+	void HandleBlink();
+
 	
 
 public:
+	
+	UPROPERTY(EditAnywhere, Category="Particle")
+	UNiagaraComponent* DashParticleSystem = nullptr;
+	
 	USkeletalMeshComponent* GetPlayerMesh() const { return ThirdPersonPlayerMesh; }
 
 	UPlayerAmmoHUD* GetPlayerAmmoHUD() const {return PlayerAmmoHUD;}
@@ -152,6 +173,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool isSliding;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool isDash = false;
 
 	UFUNCTION()
 	bool GetIsADS() {return isADSed;}

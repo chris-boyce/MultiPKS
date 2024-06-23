@@ -13,10 +13,15 @@
 #include "Old Content/InteractComp.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 
 AThirdPersonCharacter::AThirdPersonCharacter()
 {
 	ThirdPersonPlayerMesh = GetComponentByClass<USkeletalMeshComponent>();
+	
+	
+	
 }
 
 void AThirdPersonCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -31,6 +36,14 @@ void AThirdPersonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	APlayerController* PC = Cast<APlayerController>(GetController());
+	
+	DashParticleSystem = FindComponentByClass<UNiagaraComponent>();
+	if(DashParticleSystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Has Comp"));
+		DashParticleSystem->Deactivate();
+	}
+	
 	if(PlayerAmmoHUDClass && PC)
 	{
 		PlayerAmmoHUD = CreateWidget<UPlayerAmmoHUD>(PC, PlayerAmmoHUDClass);
@@ -51,7 +64,7 @@ void AThirdPersonCharacter::BeginPlay()
 	SettingsUtility = NewObject<USettingsUtility>();
 	LookSensitivity = SettingsUtility->LoadSensitivitySetting();
 
-	SlideSpeedMultiplier = 1.57f;  // Adjust as needed
+	SlideSpeedMultiplier = 3.0f;  // Adjust as needed
 	SlideFriction = 0.1f;         // Adjust as needed
 	SlideDuration = 1.0f;         // Adjust as needed
 	SlideHeight = 44.0f;          // Adjust as needed, usually half of standing height
@@ -343,6 +356,7 @@ void AThirdPersonCharacter::HandleSlide()
 	
 	if (!isSliding)
 	{
+		DashParticleSystem->SetActive(true);
 		UE_LOG(LogTemp, Warning, TEXT("Slide Params Reached"));
 		isSliding = true;
 		GetCharacterMovement()->MaxWalkSpeed *= SlideSpeedMultiplier;  // Increase the speed temporarily
@@ -360,7 +374,58 @@ void AThirdPersonCharacter::StopSlide()
 	isSliding = false;
 	GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedMultiplier;  // Reset speed
 	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;  // Reset friction
+	DashParticleSystem->SetActive(false);
 	//GetCapsuleComponent()->SetCapsuleHalfHeight(OriginalHeight);  // Reset capsule height
+}
+
+void AThirdPersonCharacter::ResetDash()
+{
+	bCanDash = true;
+	
+}
+ 
+void AThirdPersonCharacter::HandleBlink()
+{
+	if (!bCanDash) return;
+	DashParticleSystem->SetActive(true);
+	isDash = true;
+	
+	FTimerHandle TimerHandle;
+	GetWorldTimerManager().SetTimer(TimerHandle, [this]()
+	{
+
+		FVector Start = GetActorLocation();
+		FVector ForwardVector = GetControlRotation().Vector();
+		FVector End = Start + ForwardVector * DashDistance;
+		
+		FHitResult HitResult;
+		FCollisionQueryParams CollisionParams;
+		CollisionParams.AddIgnoredActor(this);
+		
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, CollisionParams);
+
+		if (!bHit)
+		{
+		SetActorLocation(End);
+		}
+		else if (HitResult.bBlockingHit) 
+		{
+		SetActorLocation(HitResult.Location);
+		}
+
+		FTimerHandle TimerHandle2;
+		GetWorldTimerManager().SetTimer(TimerHandle2, [this]()
+		{
+			isDash = false;
+			DashParticleSystem->SetActive(false);
+		}, 0.8f, false);
+	}, 0.5f, false);
+
+	
+	bCanDash = false;
+
+	FTimerHandle UnusedHandle;
+	GetWorldTimerManager().SetTimer(UnusedHandle, this, &AThirdPersonCharacter::ResetDash, DashCooldown, false);
 }
 
 void AThirdPersonCharacter::HandleDropWeapon(AThirdPersonCharacter* PlayerDropping)
@@ -427,6 +492,8 @@ void AThirdPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(OpenMenuAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleOpenMenu);
 
 		EnhancedInputComponent->BindAction(SlideAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleSlide);
+
+		EnhancedInputComponent->BindAction(BlinkAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleBlink);
 	}
 	else
 	{
