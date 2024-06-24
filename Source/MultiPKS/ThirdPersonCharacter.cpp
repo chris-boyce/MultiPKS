@@ -8,20 +8,18 @@
 #include "SettingsUtility.h"
 #include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
-#include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Old Content/InteractComp.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NiagaraComponent.h"
-#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
 
 AThirdPersonCharacter::AThirdPersonCharacter()
 {
 	ThirdPersonPlayerMesh = GetComponentByClass<USkeletalMeshComponent>();
-	
-	
-	
+	OriginalFriction = GetCharacterMovement()->GroundFriction;
+
 }
 
 void AThirdPersonCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -36,13 +34,14 @@ void AThirdPersonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	APlayerController* PC = Cast<APlayerController>(GetController());
-	
-	DashParticleSystem = FindComponentByClass<UNiagaraComponent>();
+
+	DashParticleSystem = FindNiagaraComponentByTag(TEXT("Dash"));
 	if(DashParticleSystem)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Has Comp"));
 		DashParticleSystem->Deactivate();
 	}
+
 	
 	if(PlayerAmmoHUDClass && PC)
 	{
@@ -63,15 +62,7 @@ void AThirdPersonCharacter::BeginPlay()
 	}
 	SettingsUtility = NewObject<USettingsUtility>();
 	LookSensitivity = SettingsUtility->LoadSensitivitySetting();
-
-	SlideSpeedMultiplier = 3.0f;  // Adjust as needed
-	SlideFriction = 0.1f;         // Adjust as needed
-	SlideDuration = 1.0f;         // Adjust as needed
-	SlideHeight = 44.0f;          // Adjust as needed, usually half of standing height
-	MinSlideSpeed = 450.f;        // Minimum speed to initiate slide
-	MinForwardVelocityToSlide = 300.f;  // Minimum forward speed component to initiate slide
-	isSliding = false;
-	OriginalHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+	
 	
 }
 
@@ -145,7 +136,6 @@ void AThirdPersonCharacter::HandleFireUp()
 		{
 			Server_FireStop(PlayerWeapon[CurrentlySelectedWeapon]);
 		}
-	
 		
 	}
 	
@@ -361,8 +351,6 @@ void AThirdPersonCharacter::HandleSlide()
 		isSliding = true;
 		GetCharacterMovement()->MaxWalkSpeed *= SlideSpeedMultiplier;  // Increase the speed temporarily
 		GetCharacterMovement()->BrakingFrictionFactor = SlideFriction;  // Reduce friction to slide
-		OriginalHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
-		//GetCapsuleComponent()->SetCapsuleHalfHeight(SlideHeight);  // Reduce capsule height to simulate crouching
 		FTimerHandle UnusedHandle;
 		GetWorldTimerManager().SetTimer(UnusedHandle, this, &AThirdPersonCharacter::StopSlide, SlideDuration, false);
 	}
@@ -375,7 +363,6 @@ void AThirdPersonCharacter::StopSlide()
 	GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedMultiplier;  // Reset speed
 	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;  // Reset friction
 	DashParticleSystem->SetActive(false);
-	//GetCapsuleComponent()->SetCapsuleHalfHeight(OriginalHeight);  // Reset capsule height
 }
 
 void AThirdPersonCharacter::ResetDash()
@@ -426,6 +413,81 @@ void AThirdPersonCharacter::HandleBlink()
 
 	FTimerHandle UnusedHandle;
 	GetWorldTimerManager().SetTimer(UnusedHandle, this, &AThirdPersonCharacter::ResetDash, DashCooldown, false);
+}
+
+void AThirdPersonCharacter::RestoreFriction() 
+{
+	GetCharacterMovement()->GroundFriction = OriginalFriction;
+	GetCharacterMovement()->GravityScale = 1.0f;
+	BeamNiagaraComponent->DestroyComponent();
+	DashParticleSystem->SetActive(false);
+	isGrappling = false;
+}
+
+void AThirdPersonCharacter::PullPlayerToHook()
+{
+	isGrappling = true;
+	FVector PlayerLocation = GetActorLocation();
+	FVector Direction = (GrapplingHitLocation - PlayerLocation).GetSafeNormal();
+	
+	GetCharacterMovement()->GroundFriction = 0.0f;
+
+	GetCharacterMovement()->GravityScale = 0.5f;
+
+	LaunchCharacter(Direction * HookSpeed, true, true);
+
+	DashParticleSystem->SetActive(true);
+
+	BeamNiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, BeamTemplate, GetActorLocation(), GetActorRotation());
+				
+	if (BeamNiagaraComponent)
+	{
+		BeamNiagaraComponent->SetNiagaraVariableVec3("User.StartPos", GetActorLocation());
+		BeamNiagaraComponent->SetNiagaraVariableVec3("User.EndPos", GrapplingHitLocation);
+		BeamNiagaraComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+	}
+	
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AThirdPersonCharacter::RestoreFriction, 1.0f, false);
+}
+
+void AThirdPersonCharacter::HandleGrappling()
+{
+	FVector StartLocation = MainCamera->GetComponentLocation();
+	FVector ForwardVector = MainCamera->GetForwardVector();
+	FVector EndLocation = StartLocation + ForwardVector * HookRange;
+	
+	FHitResult OutHit;
+	FCollisionQueryParams CollisionParams;
+
+	if (GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, EndLocation, ECC_Visibility, CollisionParams))
+	{
+		if (OutHit.bBlockingHit)
+		{
+			if (OutHit.ImpactPoint.Z > StartLocation.Z)
+			{
+				GrapplingHitLocation = OutHit.ImpactPoint;
+				
+				PullPlayerToHook();
+				
+			}
+		}
+	}
+}
+
+UNiagaraComponent* AThirdPersonCharacter::FindNiagaraComponentByTag(const FName& Tag)
+{
+	TArray<UNiagaraComponent*> Components;
+	GetComponents<UNiagaraComponent>(Components);
+    
+	for (UNiagaraComponent* Comp : Components)
+	{
+		if (Comp->ComponentTags.Contains(Tag))
+		{
+			return Comp;
+		}
+	}
+	return nullptr;
 }
 
 void AThirdPersonCharacter::HandleDropWeapon(AThirdPersonCharacter* PlayerDropping)
@@ -494,6 +556,8 @@ void AThirdPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(SlideAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleSlide);
 
 		EnhancedInputComponent->BindAction(BlinkAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleBlink);
+
+		EnhancedInputComponent->BindAction(GrapplingAction, ETriggerEvent::Triggered, this, &AThirdPersonCharacter::HandleGrappling);
 	}
 	else
 	{

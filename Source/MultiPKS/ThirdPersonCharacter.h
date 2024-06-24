@@ -84,16 +84,18 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* BlinkAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* GrapplingAction;
 	
 	USettingsUtility* SettingsUtility;
 
 	/* ---- Slide Vars ----- */
-	float SlideSpeedMultiplier;
-	float SlideFriction;
-	float SlideDuration;
-	float SlideHeight;
-	float MinSlideSpeed;
-	float MinForwardVelocityToSlide;
+	float SlideSpeedMultiplier = 2.5f;
+	float SlideFriction = 0.1f;
+	float SlideDuration = 1.0f;
+	float MinSlideSpeed = 450.f;
+	float MinForwardVelocityToSlide = 300.0f;
 	float OriginalHeight;
 
 	UPROPERTY(EditAnywhere, Category = "Teleport Dash")
@@ -102,7 +104,14 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Teleport Dash")
 	float DashCooldown = 5.0f;  // Cooldown in seconds
 
+	float HookRange = 2000.f; // 1000 Unreal units
+	float HookSpeed = 1500.f;
+	
 	bool bCanDash = true;
+	
+	FVector GrapplingHitLocation;
+
+	float OriginalFriction;
 
 	
 
@@ -142,12 +151,31 @@ private:
 	
 	void HandleBlink();
 
+	void RestoreFriction();
+	
+	void PullPlayerToHook();
+	
+	void HandleGrappling();
+
+	UNiagaraComponent* FindNiagaraComponentByTag(const FName& Tag);
+	
+
+
+
 	
 
 public:
 	
-	UPROPERTY(EditAnywhere, Category="Particle")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Particle")
 	UNiagaraComponent* DashParticleSystem = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Particle")
+	UNiagaraComponent* BeamNiagaraComponent = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	UNiagaraSystem* BeamTemplate;
+
+	
 	
 	USkeletalMeshComponent* GetPlayerMesh() const { return ThirdPersonPlayerMesh; }
 
@@ -172,10 +200,13 @@ public:
 	bool isADSed = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool isSliding;
+	bool isSliding = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool isDash = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool isGrappling = false;
 
 	UFUNCTION()
 	bool GetIsADS() {return isADSed;}
