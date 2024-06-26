@@ -43,7 +43,7 @@ private:
 	UPROPERTY(EditAnywhere, Category="BulletMod")
 	TSubclassOf<UBulletBaseComponent> BulletModClasses;
 
-	UPROPERTY(VisibleAnywhere, Category="BulletMod")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="BulletMod")
 	UBulletBaseComponent* BulletMod;
 
 	UPROPERTY(VisibleAnywhere, Category="BulletMod")

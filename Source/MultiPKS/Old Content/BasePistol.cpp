@@ -138,6 +138,8 @@ void ABasePistol::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(ABasePistol, ScopeComponent);
 	DOREPLIFETIME(ABasePistol, MuzzleComponent);
 	DOREPLIFETIME(ABasePistol, GripComponent);
+	DOREPLIFETIME(ABasePistol, ValueData);
+	DOREPLIFETIME(ABasePistol, TransformedValueData);
 }
 
 

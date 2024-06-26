@@ -5,18 +5,28 @@
 
 #include "Damageable.h"
 #include "Components/AudioComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Particles/ParticleSystemComponent.h"
 
 
 AExplosion::AExplosion()
 {
-
+	bReplicates = true;
 	ExplosionEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ExplosionEffect"));
 	ExplosionEffect->SetupAttachment(RootComponent);
 	
 	ExplosionSound = CreateDefaultSubobject<UAudioComponent>(TEXT("ExplosionSound"));
 	ExplosionSound->SetupAttachment(RootComponent);
 	PrimaryActorTick.bCanEverTick = true;
+	
+}
+
+void AExplosion::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AExplosion, DamageRadius);
+	DOREPLIFETIME(AExplosion, ExplosionDamage);
+	DOREPLIFETIME(AExplosion, ExplosionEffect);
 	
 }
 
@@ -54,7 +64,7 @@ void AExplosion::Explode()
 {
 	Super::BeginPlay();
 	TArray<FHitResult> HitResults;
-	TSet<AActor*> DamagedActors; // Set to track already damaged actors
+	TSet<AActor*> DamagedActors; 
 
 	FCollisionShape CollisionShape = FCollisionShape::MakeSphere(DamageRadius);
 	FCollisionQueryParams QueryParams(TEXT("ExplosionQuery"), true, this);

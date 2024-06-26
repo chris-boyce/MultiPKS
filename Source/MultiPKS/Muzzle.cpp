@@ -21,6 +21,14 @@ void AMuzzle::BeginPlay()
 	
 }
 
+void AMuzzle::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AMuzzle, AttachmentValue);
+	DOREPLIFETIME(AMuzzle, BulletVelocity);
+	DOREPLIFETIME(AMuzzle, FireSound);
+	
+}
 
 
 void AMuzzle::Tick(float DeltaTime)

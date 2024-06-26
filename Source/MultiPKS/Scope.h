@@ -24,7 +24,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Scope")
 	FString AttachmentName = "Scope";
 
-	UPROPERTY(VisibleAnywhere, Category="Scope")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Scope")
 	int AttachmentValue = 0;
 
 	UPROPERTY(EditDefaultsOnly, Category="Scope|ADS")
@@ -53,12 +53,9 @@ public:
 
 	UFUNCTION()
 	void ToggleCameraPosition(UCameraComponent* PlayerCamera, bool isADSed);
-
-	UFUNCTION(Server,Reliable)
-	void Server_ToggleCameraPosition(UCameraComponent* PlayerCamera, bool isADSed);
-
-	UFUNCTION(NetMulticast,Reliable)
-	void Multi_ToggleCameraPosition(UCameraComponent* PlayerCamera, bool isADSed);
+	
+	//UFUNCTION(NetMulticast,Reliable)
+	//void Multi_ToggleCameraPosition(UCameraComponent* PlayerCamera, bool isADSed);
 
 	UFUNCTION()
 	void AdjustScaleValue(int Scale);

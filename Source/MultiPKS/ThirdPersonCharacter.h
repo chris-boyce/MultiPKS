@@ -143,26 +143,48 @@ private:
 
 	void HideWeapons();
 
+	/* ---- Server-Client Slide ---- */
+
 	void HandleSlide();
 
 	void StopSlide();
 
+	UFUNCTION(Server, Reliable)
+	void Server_Slide();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_Slide();
+
+	
+
+
+
+	/* ---- Server-Client Blink ---- */
+	void HandleBlink();
+
 	void ResetDash();
 	
-	void HandleBlink();
+	UFUNCTION(Server, Reliable)
+	void Server_Blink();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_Blink();
+
+
+	/* ---- Server-Client Grappling ---- */
+	void HandleGrappling();
+
+	void PullPlayerToHook();
 
 	void RestoreFriction();
 	
-	void PullPlayerToHook();
+	UFUNCTION(Server, Reliable)
+	void Server_Grappling();
 	
-	void HandleGrappling();
-
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_Grappling();
+	
 	UNiagaraComponent* FindNiagaraComponentByTag(const FName& Tag);
-	
-
-
-
-	
 
 public:
 	

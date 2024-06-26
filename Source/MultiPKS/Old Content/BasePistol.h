@@ -168,10 +168,10 @@ private:
 
 	void ExtractValueDataFromSeed(const FString& OriginalString);
 
-	UPROPERTY(VisibleAnywhere, Category = "Seed")
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Seed")
 	TArray<int> ValueData;
 
-	UPROPERTY(VisibleAnywhere, Category = "Seed")
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Seed")
 	TArray<int> TransformedValueData;
 
 	int ExponentialValueShift(int GunBaseValue, int AttachmentBaseValue);

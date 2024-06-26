@@ -14,7 +14,10 @@ AScope::AScope()
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	RootComponent = StaticMeshComponent;
 	ADSSpeedRange = FVector2D(0.5f, 2.0f);
+	bReplicates = true;
 }
+
+
 
 void AScope::BeginPlay()
 {
@@ -77,6 +80,7 @@ void AScope::AdjustScaleValue(int Scale)
 	ADSSpeed = FMath::Lerp(ADSSpeedRange.X, ADSSpeedRange.Y, ScaleAlpha);
 }
 
+/*
 void AScope::Multi_ToggleCameraPosition_Implementation(UCameraComponent* PlayerCamera, bool isADSed)
 {
 	UE_LOG(LogTemp, Warning, TEXT("--------- TOGGLE CAMERA POS HAS RUN ----------"));
@@ -93,11 +97,9 @@ void AScope::Multi_ToggleCameraPosition_Implementation(UCameraComponent* PlayerC
 		PlayerCamera->SetFieldOfView(FOVChange);
 	}
 }
+*/
 
-void AScope::Server_ToggleCameraPosition_Implementation(UCameraComponent* PlayerCamera, bool isADSed)
-{
-	
-}
+
 
 
 void AScope::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -106,6 +108,7 @@ void AScope::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePr
 
 	DOREPLIFETIME(AScope, ADSSpeed);
 	DOREPLIFETIME(AScope, FOVChange);
+	DOREPLIFETIME(AScope, AttachmentValue);
 	
 	
 }

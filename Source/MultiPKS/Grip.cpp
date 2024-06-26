@@ -3,6 +3,8 @@
 
 #include "Grip.h"
 
+#include "Net/UnrealNetwork.h"
+
 
 AGrip::AGrip()
 {
@@ -23,6 +25,15 @@ void AGrip::BeginPlay()
 void AGrip::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void AGrip::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AGrip, AttachmentValue);
+	DOREPLIFETIME(AGrip, UnADSMoveSpeed);
+	DOREPLIFETIME(AGrip, ADSedMoveSpeed);
+	DOREPLIFETIME(AGrip, RecoilAmount);
 }
 
 void AGrip::ChangePlayerSpeed(AThirdPersonCharacter* Player, bool isADSed)

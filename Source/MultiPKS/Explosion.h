@@ -13,13 +13,18 @@ class MULTIPKS_API AExplosion : public AActor
 	
 public:	
 	AExplosion();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
-	UPROPERTY(EditAnywhere, Category="Bullet")
+	UPROPERTY(Replicated, EditAnywhere, Category="Bullet")
 	UParticleSystemComponent* ExplosionEffect;
 	
 	UPROPERTY(EditAnywhere, Category="Bullet")
 	UAudioComponent* ExplosionSound;
+	
+	UPROPERTY(Replicated)
 	float DamageRadius = 100.0f;
+	UPROPERTY(Replicated)
 	float ExplosionDamage = 50.0f;
 
 	void InitExplosion(float NewDamageRadius, float NewExplosionDamage);
@@ -29,6 +34,7 @@ protected:
 	float CalculateDamage(float Distance);
 	
 	virtual void BeginPlay() override;
+	
 	void Explode();
 
 public:	

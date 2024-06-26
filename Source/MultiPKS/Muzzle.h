@@ -44,10 +44,12 @@ protected:
 
 public:
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UPROPERTY(EditDefaultsOnly, Category="Muzzle")
 	FString AttachmentName = "Muzzle";
 
-	UPROPERTY(VisibleAnywhere, Category="Muzzle")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Muzzle")
 	int AttachmentValue = 0;
 	
 	virtual void Tick(float DeltaTime) override;
@@ -55,10 +57,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* StaticMeshComponent;
 
-	UPROPERTY(EditDefaultsOnly, Category="Muzzle|Attribute")
+	UPROPERTY(Replicated, EditDefaultsOnly, Category="Muzzle|Attribute")
 	float BulletVelocity;
 
-	UPROPERTY(EditDefaultsOnly, Category="Muzzle|Sound")
+	UPROPERTY(Replicated, EditDefaultsOnly, Category="Muzzle|Sound")
 	FBulletSound FireSound;
 
 	UPROPERTY(EditDefaultsOnly, Category="Seed")

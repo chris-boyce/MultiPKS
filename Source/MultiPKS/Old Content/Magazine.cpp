@@ -26,6 +26,8 @@ void AMagazine::BeginPlay()
 	
 }
 
+
+
 void AMagazine::AdjustScaleValue(int Scale)
 {
 	AttachmentScaleValue = Scale;
@@ -76,6 +78,11 @@ void AMagazine::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 
 	DOREPLIFETIME(AMagazine, CurrentAmmo);
 	DOREPLIFETIME(AMagazine, MaxAmmo);
+	DOREPLIFETIME(AMagazine, ReloadSpeed);
+	DOREPLIFETIME(AMagazine, AttachmentScaleValue);
+	DOREPLIFETIME(AMagazine, BulletElementalType);
+	DOREPLIFETIME(AMagazine, ElementalEffectTime);
+	DOREPLIFETIME(AMagazine, ElementalPercentageChance);
 	
 	
 }

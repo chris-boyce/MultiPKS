@@ -21,10 +21,12 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UPROPERTY(EditDefaultsOnly, Category="Grip")
 	FString AttachmentName = "Grip";
 
-	UPROPERTY(VisibleAnywhere, Category="Grip")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Grip")
 	int AttachmentValue;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -33,19 +35,19 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
 	FVector2D UnADSMoveSpeedRange;
 
-	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
+	UPROPERTY(Replicated,EditDefaultsOnly, Category="Grip|Attribute")
 	float UnADSMoveSpeed;
 
 	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
 	FVector2D ADSedMoveSpeedRange;
 
-	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
+	UPROPERTY(Replicated, EditDefaultsOnly, Category="Grip|Attribute")
 	float ADSedMoveSpeed;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
 	FVector2D RecoilAmountRange;
 
-	UPROPERTY(EditDefaultsOnly, Category="Grip|Attribute")
+	UPROPERTY(Replicated, EditDefaultsOnly, Category="Grip|Attribute")
 	float RecoilAmount;
 
 	UFUNCTION()

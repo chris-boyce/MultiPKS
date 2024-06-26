@@ -29,13 +29,15 @@ protected:
 
 public:
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* StaticMeshComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category="Barrel")
 	FString AttachmentName = "Barrel";
 
-	UPROPERTY(VisibleAnywhere, Category="Barrel")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Barrel")
 	int AttachementScale = 0;
 	
 	virtual void Tick(float DeltaTime) override;
@@ -45,7 +47,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Barrel|Attributes")
 	FVector2D FireRateRange;
 
-	UPROPERTY(VisibleAnywhere, Category="Barrel|Attributes")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Barrel|Attributes")
 	float FireRate = 0.2f;
 
 	/* ---- Damage ---- */
@@ -53,7 +55,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Barrel|Attributes")
 	FVector2D DamageRange;
 
-	UPROPERTY(VisibleAnywhere, Category="Barrel|Attributes")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Barrel|Attributes")
 	float BulletDamage = 10.0f;
 
 	/* ---- Burst ---- */
@@ -61,13 +63,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Barrel|Attributes|Burst", meta = (EditCondition = "FireMode == EFireMode::Burst"))
 	FVector2D BurstSpeedRange;
 
-	UPROPERTY(VisibleAnywhere, Category="Barrel|Attributes|Burst", meta = (EditCondition = "FireMode == EFireMode::Burst"))
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Barrel|Attributes|Burst", meta = (EditCondition = "FireMode == EFireMode::Burst"))
 	float BurstSpeed = 0.05f;
 
-	UPROPERTY(VisibleAnywhere, Category="Barrel|Attributes|Burst", meta = (EditCondition = "FireMode == EFireMode::Burst"))
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Barrel|Attributes|Burst", meta = (EditCondition = "FireMode == EFireMode::Burst"))
 	int BurstCount = 3;
 	
-	UPROPERTY(EditDefaultsOnly, Category="Barrel|Attributes")
+	UPROPERTY(Replicated, EditDefaultsOnly, Category="Barrel|Attributes")
 	EFireMode FireMode = EFireMode::Automatic;
 	
 	UFUNCTION()

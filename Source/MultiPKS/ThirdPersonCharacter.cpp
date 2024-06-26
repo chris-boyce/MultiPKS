@@ -307,7 +307,6 @@ void AThirdPersonCharacter::HandleOpenMenu()
 
 void AThirdPersonCharacter::HideWeapons()
 {
-	
 	if(HasAuthority())
 	{
 		Multi_SwitchWeapon(this);
@@ -319,6 +318,32 @@ void AThirdPersonCharacter::HideWeapons()
 }
 
 void AThirdPersonCharacter::HandleSlide()
+{
+	if(HasAuthority())
+	{
+		Multi_Slide();
+	}
+	else
+	{
+		Server_Slide();
+	}
+	
+}
+
+void AThirdPersonCharacter::StopSlide()
+{
+	isSliding = false;
+	GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedMultiplier;  // Reset speed
+	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;  // Reset friction
+	DashParticleSystem->SetActive(false);
+}
+
+void AThirdPersonCharacter::Server_Slide_Implementation()
+{
+	Multi_Slide();
+}
+
+void AThirdPersonCharacter::Multi_Slide_Implementation()
 {
 	FVector ForwardVector = GetActorForwardVector();
 	FVector Velocity = GetVelocity();
@@ -354,24 +379,14 @@ void AThirdPersonCharacter::HandleSlide()
 		FTimerHandle UnusedHandle;
 		GetWorldTimerManager().SetTimer(UnusedHandle, this, &AThirdPersonCharacter::StopSlide, SlideDuration, false);
 	}
-	
 }
 
-void AThirdPersonCharacter::StopSlide()
+void AThirdPersonCharacter::Server_Blink_Implementation()
 {
-	isSliding = false;
-	GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedMultiplier;  // Reset speed
-	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;  // Reset friction
-	DashParticleSystem->SetActive(false);
+	Multi_Blink();
 }
 
-void AThirdPersonCharacter::ResetDash()
-{
-	bCanDash = true;
-	
-}
- 
-void AThirdPersonCharacter::HandleBlink()
+void AThirdPersonCharacter::Multi_Blink_Implementation()
 {
 	if (!bCanDash) return;
 	DashParticleSystem->SetActive(true);
@@ -415,6 +430,24 @@ void AThirdPersonCharacter::HandleBlink()
 	GetWorldTimerManager().SetTimer(UnusedHandle, this, &AThirdPersonCharacter::ResetDash, DashCooldown, false);
 }
 
+void AThirdPersonCharacter::ResetDash()
+{
+	bCanDash = true;
+	
+}
+ 
+void AThirdPersonCharacter::HandleBlink()
+{
+	if(HasAuthority())
+	{
+		Multi_Blink();
+	}
+	else
+	{
+		Server_Blink();
+	}
+}
+
 void AThirdPersonCharacter::RestoreFriction() 
 {
 	GetCharacterMovement()->GroundFriction = OriginalFriction;
@@ -452,6 +485,23 @@ void AThirdPersonCharacter::PullPlayerToHook()
 }
 
 void AThirdPersonCharacter::HandleGrappling()
+{
+	if(HasAuthority())
+	{
+		Multi_Grappling();
+	}
+	else
+	{
+		Server_Grappling();
+	}
+}
+
+void AThirdPersonCharacter::Server_Grappling_Implementation()
+{
+	Multi_Grappling();
+}
+
+void AThirdPersonCharacter::Multi_Grappling_Implementation()
 {
 	FVector StartLocation = MainCamera->GetComponentLocation();
 	FVector ForwardVector = MainCamera->GetForwardVector();

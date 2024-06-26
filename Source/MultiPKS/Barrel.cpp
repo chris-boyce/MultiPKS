@@ -8,6 +8,7 @@
 #include "Grip.h"
 #include "Muzzle.h"
 #include "Camera/CameraComponent.h"
+#include "Net/UnrealNetwork.h"
 
 
 ABarrel::ABarrel()
@@ -25,6 +26,18 @@ ABarrel::ABarrel()
 void ABarrel::BeginPlay()
 {
 	Super::BeginPlay();
+	
+}
+
+void ABarrel::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ABarrel, AttachementScale);
+	DOREPLIFETIME(ABarrel, FireRate);
+	DOREPLIFETIME(ABarrel, BulletDamage);
+	DOREPLIFETIME(ABarrel, BurstSpeed);
+	DOREPLIFETIME(ABarrel, BurstCount);
+	DOREPLIFETIME(ABarrel, FireMode);
 	
 }
 
