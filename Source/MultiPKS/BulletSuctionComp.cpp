@@ -14,10 +14,10 @@ void UBulletSuctionComp::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UBulletSuctionComp::HandleImpact(const FHitResult& HitResult)
+bool UBulletSuctionComp::HandleImpact(const FHitResult& HitResult)
 {
-	Super::HandleImpact(HitResult);
 	ApplySuction(HitResult.Location);
+	return true;
 }
 
 void UBulletSuctionComp::ApplySuction(const FVector& ImpactPoint)

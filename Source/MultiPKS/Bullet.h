@@ -25,6 +25,8 @@ public:
 	
 	void InitializeVariables(float BulletDamage, float BulletVelocity);
 
+	void InitializeVariables(float BulletDamage, float BulletVelocity, int BulletModIndex, int SecondBulletModIndex);
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY(Replicated)
@@ -40,11 +42,14 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category=Projectile)
 	USphereComponent* CollisionComp;
 
-	UPROPERTY(EditAnywhere, Category="BulletMod")
-	TSubclassOf<UBulletBaseComponent> BulletModClasses;
-
+	UPROPERTY(EditAnywhere)
+	TArray<TSubclassOf<UBulletBaseComponent>> BulletComps;
+	
 	UPROPERTY(Replicated, VisibleAnywhere, Category="BulletMod")
 	UBulletBaseComponent* BulletMod;
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category="BulletMod")
+	UBulletBaseComponent* SecondBulletMod;
 
 	UPROPERTY(VisibleAnywhere, Category="BulletMod")
 	bool isGotBulletMod = false;

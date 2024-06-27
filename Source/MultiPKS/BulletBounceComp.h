@@ -22,7 +22,7 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	virtual void HandleImpact(const FHitResult& HitResult) override;
+	virtual bool HandleImpact(const FHitResult& HitResult) override;
 
 	bool HasBounced = false;
 	

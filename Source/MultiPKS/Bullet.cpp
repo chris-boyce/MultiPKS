@@ -3,6 +3,7 @@
 
 #include "Bullet.h"
 
+#include "BulletMagneticComp.h"
 #include "Damageable.h"
 #include "Net/UnrealNetwork.h"
 
@@ -41,7 +42,15 @@ void ABullet::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if(isGotBulletMod)
 	{
-		BulletMod->HandleMovement();
+		if( BulletMod->IsA(UBulletMagneticComp::StaticClass()))
+		{
+			BulletMod->HandleMovement();
+		}
+		if(SecondBulletMod && SecondBulletMod->IsA(UBulletMagneticComp::StaticClass()))
+		{
+			SecondBulletMod->HandleMovement();
+		}
+		
 	}
 }
 
@@ -50,14 +59,29 @@ void ABullet::InitializeVariables(float BulletDamage, float BulletVelocity)
 	Damage = BulletDamage;
 	ProjectileMovement->InitialSpeed = BulletVelocity;
 	ProjectileMovement->MaxSpeed = BulletVelocity;
+	isGotBulletMod = false;
+}
 
-	if(BulletModClasses)
+void ABullet::InitializeVariables(float BulletDamage, float BulletVelocity, int BulletModIndex, int SecondBulletModIndex)
+{
+	Damage = BulletDamage;
+	ProjectileMovement->InitialSpeed = BulletVelocity;
+	ProjectileMovement->MaxSpeed = BulletVelocity;
+	if(BulletModIndex != -1)
 	{
+		BulletMod = Cast<UBulletBaseComponent>(AddComponentByClass(BulletComps[BulletModIndex] ,false, FTransform(FRotator::ZeroRotator, FVector::ZeroVector, FVector(1.0, 1.0, 1.0)), false ));
 		isGotBulletMod = true;
-		BulletMod = Cast<UBulletBaseComponent>(AddComponentByClass(BulletModClasses,false, FTransform(FRotator::ZeroRotator, FVector::ZeroVector, FVector(1.0, 1.0, 1.0)), false ));
+	}
+	if(SecondBulletModIndex != -1)
+	{
+		SecondBulletMod = Cast<UBulletBaseComponent>(AddComponentByClass(BulletComps[SecondBulletModIndex] ,false, FTransform(FRotator::ZeroRotator, FVector::ZeroVector, FVector(1.0, 1.0, 1.0)), false ));
+		isGotBulletMod = true;
 	}
 	
 }
+	
+	
+	
 
 void ABullet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -72,13 +96,25 @@ void ABullet::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveCo
 	
 	if(HasAuthority())
 	{
-		if(isGotBulletMod)
+		if(isGotBulletMod && !SecondBulletMod)
 		{
-			BulletMod->HandleImpact(Hit);
+			if(BulletMod->HandleImpact(Hit))
+			{
+				 Destroy();
+			}
+			
+		}
+		else if(isGotBulletMod && SecondBulletMod)
+		{
+			if(BulletMod->HandleImpact(Hit) && SecondBulletMod->HandleImpact(Hit))
+			{
+				Destroy();
+			}
 		}
 		else
 		{
 			DoDamage(Other, Hit);
+			Destroy();
 		}
 		
 		

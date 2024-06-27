@@ -21,7 +21,7 @@ protected:
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual void HandleImpact(const FHitResult& HitResult);
+	virtual bool HandleImpact(const FHitResult& HitResult);
 	
 	virtual void HandleMovement();
 };

@@ -12,10 +12,10 @@ void UBulletExplosionComp::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UBulletExplosionComp::HandleImpact(const FHitResult& HitResult)
+bool UBulletExplosionComp::HandleImpact(const FHitResult& HitResult)
 {
 	Explode(HitResult.Location);
-	Super::HandleImpact(HitResult);
+	return true;
 }
 
 void UBulletExplosionComp::Explode(const FVector& HitLocation)

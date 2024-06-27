@@ -95,7 +95,8 @@ void ABarrel::HandleFire(AThirdPersonCharacter* FiringCharacter, TSubclassOf<AAc
 	FActorSpawnParameters ActorSpawnParams;
 	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(ProjectileClass, SpawnLocation , SpawnRotation , ActorSpawnParams);
-	Bullet->InitializeVariables(BulletDamage, Muzzle->BulletVelocity);
+	//Bullet->InitializeVariables(BulletDamage, Muzzle->BulletVelocity);
+	Bullet->InitializeVariables(BulletDamage, Muzzle->BulletVelocity, BulletModIndex, SecondBulletModIndex);
 
 
 	FiringCharacter->RotateCamera(Grip->RecoilAmount, 0.0f);

@@ -24,7 +24,7 @@ public:
 	
 	virtual void HandleMovement() override;
 
-	virtual void HandleImpact(const FHitResult& HitResult) override;
+	virtual bool HandleImpact(const FHitResult& HitResult) override;
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,

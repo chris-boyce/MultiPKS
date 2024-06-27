@@ -19,7 +19,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 public:
-	virtual void HandleImpact(const FHitResult& HitResult) override;
+	virtual bool HandleImpact(const FHitResult& HitResult) override;
 
 	void ApplySuction(const FVector& ImpactPoint);
 

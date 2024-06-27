@@ -23,7 +23,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AExplosion> ExplosiveClass;
 
-	virtual void HandleImpact(const FHitResult& HitResult) override;
+	virtual bool HandleImpact(const FHitResult& HitResult) override;
 
 private:
 	void Explode(const FVector& HitLocation);

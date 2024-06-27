@@ -24,9 +24,9 @@ void UBulletBaseComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	
 }
 
-void UBulletBaseComponent::HandleImpact(const FHitResult& HitResult)
+bool UBulletBaseComponent::HandleImpact(const FHitResult& HitResult)
 {
-	GetOwner()->Destroy();
+	return true;
 }
 
 void UBulletBaseComponent::HandleMovement()

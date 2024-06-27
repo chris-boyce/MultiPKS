@@ -82,6 +82,10 @@ public:
 	
 	UFUNCTION()
 	void AdjustScaleValue(int Scale);
+
+	int BulletModIndex = -1;
+
+	int SecondBulletModIndex = -1;
 	
 	
 	/* --- TBA --- */

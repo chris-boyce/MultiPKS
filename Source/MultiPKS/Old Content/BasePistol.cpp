@@ -69,6 +69,21 @@ void ABasePistol::BeginPlay()
 			
 			WeaponData = GunDataSingleton->ReturnGunData(GunData);
 		}
+
+		if(ValueData[0] <= 25)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Adding Mod to Weapon"));
+			BulletModIndex = FMath::RandRange(0, BulletModClasses.Num() - 1);
+			if(ValueData[0] <= 10) /* This is a "Do While" Loop --- New --- */
+			{
+				do
+				{
+					SecondBulletModIndex = FMath::RandRange(0, BulletModClasses.Num() - 1);
+				}
+				while (SecondBulletModIndex == BulletModIndex);
+			}
+			
+		}
 		
 	}
 	
@@ -124,6 +139,8 @@ void ABasePistol::BeginPlay()
 	GripComponent = GetWorld()->SpawnActor<AGrip>(WeaponData.Grips, GetActorLocation(), GetActorRotation(), SpawnParams);
 	GripComponent->AttachToComponent(BarrelComponent->StaticMeshComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("Grip_Socket"));
 	GripComponent->AdjustScaleValue(TransformedValueData[4]);
+
+	
 	
 }
 
@@ -140,6 +157,8 @@ void ABasePistol::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(ABasePistol, GripComponent);
 	DOREPLIFETIME(ABasePistol, ValueData);
 	DOREPLIFETIME(ABasePistol, TransformedValueData);
+	DOREPLIFETIME(ABasePistol, BulletModIndex);
+	DOREPLIFETIME(ABasePistol, SecondBulletModIndex);
 }
 
 
@@ -308,10 +327,10 @@ void ABasePistol::Fire(AThirdPersonCharacter* FiringCharacter)
 	}
 	
 	FiringCharacter->Client_ScreenShake(FiringCameraShake);
+	BarrelComponent->BulletModIndex = BulletModIndex;
+	BarrelComponent->SecondBulletModIndex = SecondBulletModIndex;
 	BarrelComponent->Fire(FiringCharacter, ProjectileClass, MagazineComponent, GripComponent, MuzzleComponent);
 	
-
-
 }
 
 

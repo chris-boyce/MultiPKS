@@ -20,15 +20,15 @@ void UBulletBounceComp::TickComponent(float DeltaTime, ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UBulletBounceComp::HandleImpact(const FHitResult& HitResult)
+bool UBulletBounceComp::HandleImpact(const FHitResult& HitResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("has hit"));
 	if(HasBounced == true)
 	{
-		GetOwner()->Destroy();
 		auto temp = Cast<ABullet>(GetOwner());
 		temp->DoDamage(HitResult.GetActor(), HitResult);
 		UE_LOG(LogTemp, Warning, TEXT("Im Gone"));
+		return true;
 	}
 	else
 	{
@@ -36,6 +36,7 @@ void UBulletBounceComp::HandleImpact(const FHitResult& HitResult)
 		auto temp = Cast<ABullet>(GetOwner());
 		temp->DoDamage(HitResult.GetActor(), HitResult);
 		HasBounced = true;
+		return false;
 	}
 	
 	

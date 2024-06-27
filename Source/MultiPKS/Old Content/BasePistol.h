@@ -8,6 +8,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/Actor.h"
+#include "MultiPKS/BulletBaseComponent.h"
 #include "MultiPKS/GunDataSingleton.h"
 #include "MultiPKS/Pickupable.h"
 #include "MultiPKS/PlayerAmmoHUD.h"
@@ -133,6 +134,20 @@ public:
 	/*---------- Grip ----------*/
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	AGrip* GripComponent;
+
+	/*---------- Mods -----------*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="BulletMods")
+	TArray<TSubclassOf<UBulletBaseComponent>> BulletModClasses;
+	
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="BulletMods")
+	int BulletModIndex = -1;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="BulletMods")
+	int SecondBulletModIndex = -1;
+
+
+
+	// ------------------------
 	
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* MainMesh;

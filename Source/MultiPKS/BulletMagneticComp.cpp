@@ -49,11 +49,11 @@ void UBulletMagneticComp::HandleMovement()
 	}
 }
 
-void UBulletMagneticComp::HandleImpact(const FHitResult& HitResult)
+bool UBulletMagneticComp::HandleImpact(const FHitResult& HitResult)
 {
-	Super::HandleImpact(HitResult);
 	auto temp = Cast<ABullet>(GetOwner());
 	temp->DoDamage(HitResult.GetActor(), HitResult);
+	return true;
 }
 
 void UBulletMagneticComp::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
