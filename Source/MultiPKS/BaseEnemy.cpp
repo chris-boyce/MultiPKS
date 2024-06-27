@@ -12,14 +12,16 @@ ABaseEnemy::ABaseEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	
+	
 }
 
 
 void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	auto SkeletalMeshComponent = GetMesh();
 	
+	auto SkeletalMeshComponent = GetMesh();
 	SkeletalMeshComponent->SetCollisionProfileName(UCollisionProfile::PhysicsActor_ProfileName);
 	SkeletalMeshComponent->SetNotifyRigidBodyCollision(true);
 	SkeletalMeshComponent->OnComponentHit.AddDynamic(this, &ABaseEnemy::OnComponentHit);
@@ -54,6 +56,18 @@ void ABaseEnemy::DetailedTakeDamage(float DamageAmount, FVector HitLocation)
 		Destroy();
 	}
 	DamageText(DamageAmount, HitLocation);
+}
+
+void ABaseEnemy::DetailedTakeDamage2(float DamageAmount, FVector HitLocation, FName BoneName)
+{
+	float TempDamageAmount = DamageAmount * GetBoneModifier(BoneName);
+	
+	CurrentHealth = CurrentHealth - TempDamageAmount;
+	if(CurrentHealth <= 0)
+	{
+		Destroy();
+	}
+	DamageText(TempDamageAmount, HitLocation);
 }
 
 
@@ -92,8 +106,19 @@ void ABaseEnemy::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiv
                            FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
-	
-	
+}
+
+float ABaseEnemy::GetBoneModifier(FName BoneName) const
+{
+	for (const FBoneModifier& Modifier : BoneModifiers)
+	{
+		if (Modifier.BoneName == BoneName)
+		{
+			return Modifier.Modifier;  
+		}
+	}
+
+	return 1.0f;
 }
 
 

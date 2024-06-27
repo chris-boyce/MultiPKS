@@ -21,7 +21,9 @@ class MULTIPKS_API IDamageable
 public:
 	virtual void TakeDamage(float DamageAmount) = 0;
 	
-	virtual void DetailedTakeDamage(float DamageAmount, FVector HitLocation) = 0;
+	virtual void DetailedTakeDamage(float DamageAmount, FVector HitLocation);
+
+	virtual void DetailedTakeDamage2(float DamageAmount, FVector HitLocation, FName BoneName);
 	
 	virtual float GetHealth() const = 0;
 };

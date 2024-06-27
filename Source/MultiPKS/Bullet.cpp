@@ -125,7 +125,7 @@ void ABullet::DoDamage(AActor* Other , const FHitResult& Hit)
 {
 	if(auto temp = Cast<IDamageable>(Other))
 	{
-		temp->DetailedTakeDamage(Damage, Hit.Location);
+		temp->DetailedTakeDamage2(Damage, Hit.Location, Hit.BoneName);
 		UE_LOG(LogTemp, Warning, TEXT("Has Been Hit : %s"), *Hit.BoneName.ToString());
 	}
 }

@@ -8,6 +8,18 @@
 #include "GameFramework/Character.h"
 #include "BaseEnemy.generated.h"
 
+USTRUCT(BlueprintType)
+struct FBoneModifier
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bone Modifier")
+	FName BoneName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bone Modifier")
+	float Modifier;
+};
+
 UCLASS()
 class MULTIPKS_API ABaseEnemy : public ACharacter, public IDamageable
 {
@@ -27,6 +39,8 @@ public:
 	virtual void TakeDamage(float DamageAmount) override;
 
 	virtual void DetailedTakeDamage(float DamageAmount, FVector HitLocation) override;
+	
+	virtual void DetailedTakeDamage2(float DamageAmount, FVector HitLocation, FName BoneName) override;
 
 	virtual float GetHealth() const override;
 	
@@ -40,10 +54,14 @@ public:
 
 	UPROPERTY(Replicated, VisibleAnywhere)
 	float CurrentHealth = 100.0f;
-
+	
 	virtual void NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void DamageText(float Amount, FVector HitLocation);
 
+	UPROPERTY(EditAnywhere, Category = "SkelData")
+	TArray<FBoneModifier> BoneModifiers;
+
+	float GetBoneModifier(FName BoneName) const;
 };
