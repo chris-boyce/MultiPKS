@@ -18,6 +18,10 @@
 #include "MultiPKS/WeaponDisplay.h"
 #include "Net/UnrealNetwork.h"
 
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+#include "HAL/PlatformFilemanager.h"
+
 
 ABasePistol::ABasePistol()
 {
@@ -139,6 +143,8 @@ void ABasePistol::BeginPlay()
 	GripComponent = GetWorld()->SpawnActor<AGrip>(WeaponData.Grips, GetActorLocation(), GetActorRotation(), SpawnParams);
 	GripComponent->AttachToComponent(BarrelComponent->StaticMeshComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("Grip_Socket"));
 	GripComponent->AdjustScaleValue(TransformedValueData[4]);
+
+	WriteDataToCSV();
 
 	
 	
@@ -272,9 +278,37 @@ int ABasePistol::ExponentialValueShift(int GunBaseValue, int AttachmentBaseValue
 {
 	float Lambda = 0.03;
 	float transformValueX = 99.0f * (1.0f - FMath::Exp(-Lambda * GunBaseValue));
+	TransformedGunValue = transformValueX;
 	float transformedValueY = (transformValueX / 99.0f) * 99.0f * (1.0f - FMath::Exp(-Lambda * AttachmentBaseValue));
 	int RoundedTransformValue = round(transformedValueY);
 	return RoundedTransformValue;
+}
+
+void ABasePistol::WriteDataToCSV()
+{
+	FString CSVFilePath = FPaths::ProjectDir() + TEXT("PistolStats.csv");
+	bool bFileExists = FPlatformFileManager::Get().GetPlatformFile().FileExists(*CSVFilePath);
+	FString CSVData;
+
+	if (!bFileExists)
+	{
+		CSVData += TEXT("Seed,GV,TV1,TV2,TV3,TV4,TV5,BM1,BM2\n");
+	}
+	
+	CSVData += FString::Printf(TEXT("%s,"), *GunSeed);
+	CSVData += FString::Printf(TEXT("%d,"), TransformedGunValue);
+	
+	for (int32 Value : TransformedValueData)
+	{
+		CSVData += FString::Printf(TEXT("%d,"), Value);
+	}
+	
+	CSVData += FString::Printf(TEXT("%d,"), BulletModIndex);
+	CSVData += FString::Printf(TEXT("%d"), SecondBulletModIndex);
+	CSVData += TEXT("\n");
+	
+	FFileHelper::SaveStringToFile(CSVData, *CSVFilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), FILEWRITE_Append);
+	
 }
 
 void ABasePistol::HideWeaponModel(bool shouldHide)

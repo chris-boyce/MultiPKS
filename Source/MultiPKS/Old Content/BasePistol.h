@@ -189,7 +189,11 @@ private:
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Seed")
 	TArray<int> TransformedValueData;
 
+	int TransformedGunValue;
+
 	int ExponentialValueShift(int GunBaseValue, int AttachmentBaseValue);
+
+	void WriteDataToCSV();
 
 	
 	
