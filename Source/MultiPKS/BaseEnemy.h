@@ -52,7 +52,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UPROPERTY(Replicated, VisibleAnywhere)
+	UPROPERTY(Replicated, BlueprintReadOnly, VisibleAnywhere)
 	float CurrentHealth = 100.0f;
 	
 	virtual void NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
