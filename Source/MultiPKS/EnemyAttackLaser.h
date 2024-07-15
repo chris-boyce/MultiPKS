@@ -12,16 +12,27 @@ UCLASS(Blueprintable)
 class MULTIPKS_API UEnemyAttackLaser : public UBaseEnemyAttackComp
 {
 	GENERATED_BODY()
-	
-public:
-	
-	virtual void BeginPlay() override;
-	
-	UFUNCTION(BlueprintCallable)
-	virtual void BeginAttack() override;
 
+public:
 	UPROPERTY(Replicated, EditAnywhere)
-	UNiagaraComponent* LaserParticle;
+	UNiagaraComponent* LaserParticle; // Replicated particle system
+
+	UPROPERTY(Replicated, Transient)
+	FVector BeamStart;
+
+	UPROPERTY(Replicated, Transient)
+	FVector BeamEnd;
+
+protected:
+	virtual void BeginPlay() override;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void BeginAttack(); 
+
+	// Multicast function to start the effect on clients
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastStartLaserEffect(FVector NewBeamStart, FVector NewBeamEnd);
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
