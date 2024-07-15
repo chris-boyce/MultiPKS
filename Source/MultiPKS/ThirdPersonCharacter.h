@@ -301,6 +301,9 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_CallUpdateHealth(float UpdatedCurrentHealth, float UpdatedMaxHealth);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UpdateHealth(float NewHealth);
+
 
 	UFUNCTION()
 	void ResetRotateCamera(float ResetTime);
@@ -334,6 +337,9 @@ public:
 	virtual void TakeDamage(float DamageAmount) override;
 
 	virtual void DetailedTakeDamage(float DamageAmount, FVector HitLocation) override;
+
+	virtual void DetailedTakeDamage2(float DamageAmount, FVector HitLocation, FName BoneName) override;
+	
 
 	virtual float GetHealth() const override;
 

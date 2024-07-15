@@ -19,7 +19,7 @@ ABullet::ABullet()
 	CollisionComp->CanCharacterStepUpOn = ECB_No;
 	
 	RootComponent = CollisionComp;
-
+	
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
 	ProjectileMovement->UpdatedComponent = CollisionComp;
 	ProjectileMovement->InitialSpeed = 3000.f;
@@ -129,4 +129,5 @@ void ABullet::DoDamage(AActor* Other , const FHitResult& Hit)
 		UE_LOG(LogTemp, Warning, TEXT("Has Been Hit : %s"), *Hit.BoneName.ToString());
 	}
 }
+
 

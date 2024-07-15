@@ -27,6 +27,7 @@ void AThirdPersonCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AThirdPersonCharacter, MainCamera);
 	DOREPLIFETIME(AThirdPersonCharacter, isADSed);
+	DOREPLIFETIME(AThirdPersonCharacter, HealthBarDisplay);
 }
 
 
@@ -696,6 +697,14 @@ void AThirdPersonCharacter::Client_CallUpdateHealth_Implementation(float Updated
 	HealthBarDisplay->UpdateHealth(UpdatedCurrentHealth, UpdatedMaxHealth);
 }
 
+void AThirdPersonCharacter::Multicast_UpdateHealth_Implementation(float NewHealth)
+{
+	if (HealthBarDisplay)
+	{
+		HealthBarDisplay->UpdateHealth(NewHealth, 100);
+	}
+}
+
 void AThirdPersonCharacter::ResetRotateCamera(float ResetTime)
 {
 	if(HasAuthority())
@@ -749,13 +758,28 @@ void AThirdPersonCharacter::RotateCamera(float RotX, float RotY)
 void AThirdPersonCharacter::TakeDamage(float DamageAmount)
 {
 	CurrentHealth = CurrentHealth - DamageAmount;
-	Client_CallUpdateHealth(CurrentHealth, MaxHealth);
+	if(!HasAuthority())
+	{
+		Client_CallUpdateHealth(CurrentHealth, MaxHealth);
+	}
 }
 
 void AThirdPersonCharacter::DetailedTakeDamage(float DamageAmount, FVector HitLocation) /*TODO : Add Location When Damaged */
 {
 	CurrentHealth = CurrentHealth - DamageAmount;
-	Client_CallUpdateHealth(CurrentHealth, MaxHealth);
+	if(!HasAuthority())
+	{
+		Client_CallUpdateHealth(CurrentHealth, MaxHealth);
+	}
+}
+
+void AThirdPersonCharacter::DetailedTakeDamage2(float DamageAmount, FVector HitLocation, FName BoneName)
+{
+	IDamageable::DetailedTakeDamage2(DamageAmount, HitLocation, BoneName);
+	CurrentHealth = CurrentHealth - DamageAmount;
+	Multicast_UpdateHealth(CurrentHealth);
+	
+	
 }
 
 float AThirdPersonCharacter::GetHealth() const
