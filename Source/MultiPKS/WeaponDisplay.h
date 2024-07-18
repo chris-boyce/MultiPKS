@@ -37,6 +37,10 @@ public:
 	UTextBlock* TXT_GunValue = nullptr;
 
 	UFUNCTION(BlueprintImplementableEvent)
+	void SetBulletModDisplay(int Index, int Index2);
+	
+
+	UFUNCTION(BlueprintImplementableEvent)
 	void StartRemoveFromParent();
 
 	

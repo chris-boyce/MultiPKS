@@ -25,6 +25,9 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void Multi_AttachGun(ABasePistol* Gun);
+
+	UFUNCTION()
+	void LogWeaponPickup(ABasePistol* Gun, int Slot);
 	
 	FDropWeapon DropWeapon;
 

@@ -112,8 +112,9 @@ private:
 	FVector GrapplingHitLocation;
 
 	float OriginalFriction;
-
 	
+	FTimerHandle RespawnTimer;
+
 
 	void Move(const FInputActionValue& Value);
 	
@@ -196,6 +197,8 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Effects")
 	UNiagaraSystem* BeamTemplate;
+
+
 
 	
 	
@@ -338,7 +341,11 @@ public:
 
 	virtual void DetailedTakeDamage(float DamageAmount, FVector HitLocation) override;
 
+	UFUNCTION(BlueprintCallable)
 	virtual void DetailedTakeDamage2(float DamageAmount, FVector HitLocation, FName BoneName) override;
+
+	UFUNCTION()
+	void Respawn();
 	
 
 	virtual float GetHealth() const override;
@@ -348,6 +355,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category="Health")
 	float MaxHealth = 100.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool isDead = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="UI")
 	TSubclassOf<UHealthBarDisplay> HealthBarClass;

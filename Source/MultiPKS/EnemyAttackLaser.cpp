@@ -4,7 +4,7 @@
 #include "EnemyAttackLaser.h"
 
 #include "NiagaraComponent.h"
-#include "Damageable.h" // Your IDamageable interface header
+#include "Damageable.h" 
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Net/UnrealNetwork.h"
@@ -12,7 +12,7 @@
 void UEnemyAttackLaser::BeginPlay()
 {
     Super::BeginPlay();
-    if (GetOwner()->HasAuthority()) // Check if we are the server
+    if (GetOwner()->HasAuthority()) 
     {
         LaserParticle = Cast<UNiagaraComponent>(GetOwner()->GetComponentByClass(UNiagaraComponent::StaticClass()));
         LaserParticle->Deactivate();
@@ -21,7 +21,7 @@ void UEnemyAttackLaser::BeginPlay()
 
 void UEnemyAttackLaser::BeginAttack()
 {
-    if (!GetOwner()->HasAuthority()) return; // Only execute on the server
+    if (!GetOwner()->HasAuthority()) return; 
 
     FVector Start = GetOwner()->GetActorLocation(); 
     FVector ForwardVector = GetOwner()->GetActorForwardVector();
@@ -37,7 +37,7 @@ void UEnemyAttackLaser::BeginAttack()
     FVector RandomOffset = FVector(FMath::RandRange(-50.f, 50.f), FMath::RandRange(-50.f, 50.f), FMath::RandRange(-5.0f, 5.0f));
     FVector RandomEnd = bHit ? OutHit.Location + RandomOffset : End; 
     
-    MulticastStartLaserEffect(Start, RandomEnd); // Start the effect on all clients
+    MulticastStartLaserEffect(Start, RandomEnd); 
 
     if (bHit)
     {
@@ -52,9 +52,9 @@ void UEnemyAttackLaser::BeginAttack()
 void UEnemyAttackLaser::MulticastStartLaserEffect_Implementation(FVector NewBeamStart, FVector NewBeamEnd)
 {
     if (!LaserParticle) return;
-    this->BeamStart = NewBeamStart; // assign to member variable
-    this->BeamEnd = NewBeamEnd;     // assign to member variable
-    LaserParticle->SetNiagaraVariableVec3("User.BeamStart", NewBeamStart); // set to particle system
+    this->BeamStart = NewBeamStart; 
+    this->BeamEnd = NewBeamEnd;     
+    LaserParticle->SetNiagaraVariableVec3("User.BeamStart", NewBeamStart); 
     LaserParticle->SetNiagaraVariableVec3("User.BeamEnd", NewBeamEnd);
     LaserParticle->Activate();
 

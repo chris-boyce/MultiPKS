@@ -14,6 +14,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "GameFramework/PlayerStart.h"
 
 AThirdPersonCharacter::AThirdPersonCharacter()
 {
@@ -334,8 +335,8 @@ void AThirdPersonCharacter::HandleSlide()
 void AThirdPersonCharacter::StopSlide()
 {
 	isSliding = false;
-	GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedMultiplier;  // Reset speed
-	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;  // Reset friction
+	GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedMultiplier;  
+	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;  
 	DashParticleSystem->SetActive(false);
 }
 
@@ -703,6 +704,14 @@ void AThirdPersonCharacter::Multicast_UpdateHealth_Implementation(float NewHealt
 	{
 		HealthBarDisplay->UpdateHealth(NewHealth, 100);
 	}
+	if(CurrentHealth <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Is Dead"));
+		isDead = true;
+		CanPerformAction = false;
+		GetWorld()->GetTimerManager().SetTimer(RespawnTimer, this, &AThirdPersonCharacter::Respawn, 3.0f, false);
+		
+	}
 }
 
 void AThirdPersonCharacter::ResetRotateCamera(float ResetTime)
@@ -775,10 +784,31 @@ void AThirdPersonCharacter::DetailedTakeDamage(float DamageAmount, FVector HitLo
 
 void AThirdPersonCharacter::DetailedTakeDamage2(float DamageAmount, FVector HitLocation, FName BoneName)
 {
-	IDamageable::DetailedTakeDamage2(DamageAmount, HitLocation, BoneName);
-	CurrentHealth = CurrentHealth - DamageAmount;
-	Multicast_UpdateHealth(CurrentHealth);
+	if(!isDead)
+	{
+		IDamageable::DetailedTakeDamage2(DamageAmount, HitLocation, BoneName);
+		CurrentHealth = CurrentHealth - DamageAmount;
+		if(CurrentHealth > 100)
+		{
+			CurrentHealth = 100;
+		}
+		Multicast_UpdateHealth(CurrentHealth);
+	}
 	
+}
+
+void AThirdPersonCharacter::Respawn()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Respawn"));
+	CanPerformAction = true;
+	isDead = false;
+	CurrentHealth = 100;
+	Multicast_UpdateHealth(CurrentHealth);
+
+	if (APlayerStart* PlayerStart = Cast<APlayerStart>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass())))
+	{
+		SetActorLocation(PlayerStart->GetActorLocation());
+	}
 	
 }
 
@@ -896,6 +926,7 @@ void AThirdPersonCharacter::Multi_DropWeapon_Implementation(ABasePistol* DropWea
 	{
 		return;
 	}
+	DropWeapon->EnableParticleSystem();
 	DropWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	DropWeapon->SphereComponentZ->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }

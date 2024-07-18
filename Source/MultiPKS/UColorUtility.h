@@ -14,5 +14,8 @@ class MULTIPKS_API UUColorUtility : public UObject
 public:
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	static void SetBorderColorBasedOnValue(UBorder* BorderComponent, int32 Value);
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	static FLinearColor SetColorBasedOnValue(int32 Value);
 	
 };

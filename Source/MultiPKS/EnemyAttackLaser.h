@@ -15,7 +15,7 @@ class MULTIPKS_API UEnemyAttackLaser : public UBaseEnemyAttackComp
 
 public:
 	UPROPERTY(Replicated, EditAnywhere)
-	UNiagaraComponent* LaserParticle; // Replicated particle system
+	UNiagaraComponent* LaserParticle; 
 
 	UPROPERTY(Replicated, Transient)
 	FVector BeamStart;
@@ -30,7 +30,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void BeginAttack(); 
 
-	// Multicast function to start the effect on clients
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastStartLaserEffect(FVector NewBeamStart, FVector NewBeamEnd);
 

@@ -82,6 +82,12 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USphereComponent* SphereComponentZ;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnableParticleSystem();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void DisableParticleSystem();
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void EnableOutline();
@@ -89,6 +95,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void DisableOutline();
 
+	void AutoUnHighlight();
+	
 	virtual void HighlightObject(AThirdPersonCharacter* InteractingCharacter) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -145,7 +153,8 @@ public:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="BulletMods")
 	int SecondBulletModIndex = -1;
 
-
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
+	bool isPickedUp = false;
 
 	// ------------------------
 	
@@ -153,7 +162,7 @@ public:
 	UStaticMeshComponent* MainMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Seed")
-	bool GunIsRandom;
+	bool GunIsRandom = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Seed")
 	FString GunSeed;
@@ -163,6 +172,17 @@ public:
 
 	UFUNCTION()
 	void HideWeaponModel(bool shouldHide);
+	
+	UPROPERTY(Replicated, VisibleAnywhere)
+	EWeaponTypes WeaponType;
+
+	UPROPERTY(Replicated, VisibleAnywhere)
+	FReturnWeaponData WeaponData;
+
+	UPROPERTY(BlueprintReadOnly)
+	int TransformedGunValue;
+
+	virtual void Destroyed() override;
 
 private:
 	UPROPERTY(EditAnywhere, Category="Singleton", meta=(AllowPrivateAccess = "true"))
@@ -171,11 +191,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category="Singleton")
 	UGunDataSingleton* GunDataSingleton;
 
-	UPROPERTY(Replicated, VisibleAnywhere)
-	EWeaponTypes WeaponType;
 	
-	UPROPERTY(Replicated, VisibleAnywhere)
-	FReturnWeaponData WeaponData;
+	
+	FTimerHandle UnhighlightTimerHandle; 
 
 	FString GenerateRandomSeed();
 
@@ -189,7 +207,7 @@ private:
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Seed")
 	TArray<int> TransformedValueData;
 
-	int TransformedGunValue;
+	
 
 	int ExponentialValueShift(int GunBaseValue, int AttachmentBaseValue);
 

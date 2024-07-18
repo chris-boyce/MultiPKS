@@ -91,6 +91,7 @@ void ABasePistol::BeginPlay()
 		
 	}
 	
+	EnableParticleSystem();
 	
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
@@ -165,47 +166,77 @@ void ABasePistol::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(ABasePistol, TransformedValueData);
 	DOREPLIFETIME(ABasePistol, BulletModIndex);
 	DOREPLIFETIME(ABasePistol, SecondBulletModIndex);
+	DOREPLIFETIME(ABasePistol, isPickedUp);
 }
 
+
+void ABasePistol::AutoUnHighlight()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Auto Remove Widget"));
+	DisableOutline();
+
+	if (WeaponDisplayWidget)
+	{
+		WeaponDisplayWidget->StartRemoveFromParent();
+		WeaponDisplayWidget = nullptr;
+		WeaponDisplayOnScreen = false;
+	}
+}
 
 void ABasePistol::HighlightObject(AThirdPersonCharacter* InteractingCharacter)
 {
 	EnableOutline();
-	if(WeaponDisplayOnScreen)
-	{
-		return;
-	}
+    if (WeaponDisplayOnScreen)
+    {
+        return;
+    }
+
+    if (InteractingCharacter)
+    {
+        APlayerController* PC = Cast<APlayerController>(InteractingCharacter->GetController());
+        if (PC)
+        {
+            // Check if the widget already exists before creating a new one
+            if (!WeaponDisplayWidget)
+            {
+                WeaponDisplayWidget = CreateWidget<UWeaponDisplay>(PC, WeaponDisplay);
+                if (WeaponDisplayWidget)
+                {
+                    WeaponDisplayWidget->AddToViewport();
+                }
+            }
+
+            if (WeaponDisplayWidget)
+            {
+                WeaponDisplayWidget->TXT_GunValue->SetText(FText::AsNumber(ValueData[0]));
+                WeaponDisplayWidget->BP_MagDisplay->SetAllText(MagazineComponent->AttachmentName, MagazineComponent->MaxAmmo, MagazineComponent->ReloadSpeed, FString("TBA"), MagazineComponent->ElementalPercentageChance, MagazineComponent->ElementalEffectTime, MagazineComponent->AttachmentScaleValue);
+                WeaponDisplayWidget->BP_ScopeDisplay->SetAllText(ScopeComponent->AttachmentName, ScopeComponent->ADSSpeed, ScopeComponent->FOVChange, ScopeComponent->AttachmentValue);
+                WeaponDisplayWidget->BP_BarrelDisplay->SetAllText(BarrelComponent->AttachmentName, BarrelComponent->FireRate, BarrelComponent->BulletDamage, BarrelComponent->FireMode, BarrelComponent->BurstSpeed, BarrelComponent->BurstCount, BarrelComponent->AttachementScale);
+                WeaponDisplayWidget->BP_MuzzleDisplay->SetAllText(MuzzleComponent->AttachmentName, MuzzleComponent->FireSound.SoundLevel, MuzzleComponent->BulletVelocity, MuzzleComponent->AttachmentValue);
+                WeaponDisplayWidget->BP_GripDisplay->SetAllText(GripComponent->AttachmentName, GripComponent->UnADSMoveSpeed, GripComponent->ADSedMoveSpeed, GripComponent->RecoilAmount, GripComponent->AttachmentValue);
+
+                WeaponDisplayWidget->SetBulletModDisplay(BulletModIndex, SecondBulletModIndex);
+
+                WeaponDisplayOnScreen = true;
+
+            	GetWorld()->GetTimerManager().SetTimer(UnhighlightTimerHandle, this, &ABasePistol::AutoUnHighlight, 10.0f, false);
+            }
+        }
+    }
 	
-	if (InteractingCharacter)
-	{
-		APlayerController* PC = Cast<APlayerController>(InteractingCharacter->GetController());
-		if (PC && WeaponDisplay)  
-		{
-
-			WeaponDisplayWidget = CreateWidget<UWeaponDisplay>(PC, WeaponDisplay);
-
-			if (WeaponDisplayWidget)
-			{
-				WeaponDisplayWidget->AddToViewport();
-				WeaponDisplayWidget->TXT_GunValue->SetText(FText::AsNumber(ValueData[0]));
-				WeaponDisplayWidget->BP_MagDisplay->SetAllText(MagazineComponent->AttachmentName, MagazineComponent->MaxAmmo, MagazineComponent->ReloadSpeed,FString("TBA"), MagazineComponent->ElementalPercentageChance, MagazineComponent->ElementalEffectTime, MagazineComponent->AttachmentScaleValue);
-				WeaponDisplayWidget->BP_ScopeDisplay->SetAllText(ScopeComponent->AttachmentName, ScopeComponent->ADSSpeed, ScopeComponent->FOVChange, ScopeComponent->AttachmentValue);
-				WeaponDisplayWidget->BP_BarrelDisplay->SetAllText(BarrelComponent->AttachmentName, BarrelComponent->FireRate, BarrelComponent->BulletDamage, BarrelComponent->FireMode, BarrelComponent->BurstSpeed, BarrelComponent->BurstCount, BarrelComponent->AttachementScale);
-				WeaponDisplayWidget->BP_MuzzleDisplay->SetAllText(MuzzleComponent->AttachmentName, MuzzleComponent->FireSound.SoundLevel, MuzzleComponent->BulletVelocity, MuzzleComponent->AttachmentValue);
-				WeaponDisplayWidget->BP_GripDisplay->SetAllText(GripComponent->AttachmentName, GripComponent->UnADSMoveSpeed, GripComponent->ADSedMoveSpeed, GripComponent->RecoilAmount, GripComponent->AttachmentValue);
-				WeaponDisplayOnScreen = true;
-			}
-		}
-	}
 }
 
 void ABasePistol::UnHighlightObject(AThirdPersonCharacter* InteractingCharacter)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Removing Widget"));
 	DisableOutline();
-	WeaponDisplayWidget->StartRemoveFromParent();
-	//WeaponDisplayWidget = nullptr;
-	WeaponDisplayOnScreen = false;
+
+	if (WeaponDisplayWidget)
+	{
+		WeaponDisplayWidget->StartRemoveFromParent();
+		WeaponDisplayWidget = nullptr;
+		WeaponDisplayOnScreen = false;
+	}
 }
 
 ABasePistol* ABasePistol::PickupObject(AThirdPersonCharacter* InteractingCharacter)
@@ -217,9 +248,26 @@ ABasePistol* ABasePistol::PickupObject(AThirdPersonCharacter* InteractingCharact
 	}
 	InteractingCharacter->UpdateAmmoHUD(MagazineComponent->CurrentAmmo, MagazineComponent->MaxAmmo);
 	
+	DisableParticleSystem();
 	
 	UE_LOG(LogTemp, Warning, TEXT("Gun being returned: %s"), *this->GetName());
+	isPickedUp = true;
 	return this;
+}
+
+void ABasePistol::Destroyed()
+{
+	TArray<AActor*> ActorsToDestroy = { BarrelComponent, GripComponent, MagazineComponent, ScopeComponent, MuzzleComponent };
+	
+	for (AActor* Actor : ActorsToDestroy)
+	{
+		if (Actor)
+		{
+			Actor->Destroy();
+		}
+	}
+	
+	Super::Destroyed();
 }
 
 FString ABasePistol::GenerateRandomSeed()
@@ -314,7 +362,7 @@ void ABasePistol::WriteDataToCSV()
 void ABasePistol::HideWeaponModel(bool shouldHide)
 {
 	BarrelComponent->StaticMeshComponent->SetVisibility(shouldHide);
-	//MuzzleComponent->StaticMeshComponent->SetVisibility(shouldHide);
+	MuzzleComponent->StaticMeshComponent->SetVisibility(shouldHide);
 }
 
 

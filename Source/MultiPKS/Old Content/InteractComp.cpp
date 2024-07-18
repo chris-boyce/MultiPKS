@@ -79,19 +79,50 @@ void UInteractComp::Multi_AttachGun_Implementation(ABasePistol* Gun)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Adding Weapon To PLayer List"));
 		Owner->PlayerWeapon.Add(Gun);
+		LogWeaponPickup(Gun, -1);
 	}
 	else
 	{
 		DropWeapon.Broadcast(Cast<AThirdPersonCharacter>(GetOwner()));
 		UE_LOG(LogTemp, Warning, TEXT("Fired BroadCast"));
 		Owner->PlayerWeapon[Owner->CurrentlySelectedWeapon] = Gun;
+		LogWeaponPickup(Gun, Owner->CurrentlySelectedWeapon);
 	}
+	
 	
 }
 
 bool UInteractComp::Multi_AttachGun_Validate(ABasePistol* Gun)
 {
 	return true;
+}
+
+void UInteractComp::LogWeaponPickup(ABasePistol* Gun, int Slot)
+{
+	FString CSVFilePath = FPaths::ProjectDir() + TEXT("PickupGun.csv");
+	bool bFileExists = FPlatformFileManager::Get().GetPlatformFile().FileExists(*CSVFilePath);
+	FString CSVData;
+
+	if (!bFileExists)
+	{
+		CSVData += TEXT("Time,Seed,WeaponType,Slot,BulletMod1,BulletMod2,MapName\n");
+	}
+	
+	FDateTime CurrentTime = FDateTime::Now();
+	FString TimeString = CurrentTime.ToString(TEXT("%d %H:%M:%S"));
+	
+	
+	CSVData += FString::Printf(TEXT("%s,"), *TimeString);
+	CSVData += FString::Printf(TEXT("%s,"), *Gun->GunSeed);
+	CSVData += FString::Printf(TEXT("%d,"), Slot);
+	CSVData += FString::Printf(TEXT("%s,"), *Gun->WeaponData.BaseMesh->GetName());
+	CSVData += FString::Printf(TEXT("%d,"), Gun->BulletModIndex);
+	CSVData += FString::Printf(TEXT("%d,"), Gun->SecondBulletModIndex);
+	CSVData += FString::Printf(TEXT("%s,"), *GetWorld()->GetMapName());
+	CSVData += TEXT("\n");
+	
+	FFileHelper::SaveStringToFile(CSVData, *CSVFilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), FILEWRITE_Append);
+
 }
 
 void UInteractComp::PerformLineTrace()
@@ -148,7 +179,7 @@ void UInteractComp::PerformLineTrace()
 void UInteractComp::BeginPlay()
 {
 	Super::BeginPlay();
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UInteractComp::PerformLineTrace, 0.2f, true);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UInteractComp::PerformLineTrace, 0.05f, true);
 	
 }
 
