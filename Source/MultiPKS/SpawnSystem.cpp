@@ -29,18 +29,16 @@ void ASpawnSystem::Tick(float DeltaTime)
 
 void ASpawnSystem::StartNextWave()
 {
-	GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
-
+	if(SpawnTimerHandle.IsValid())
+	{
+		GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
+	}
+	
 	if (CurrentWaveIndex >= Waves.Num())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("All Waves Completed"));
-		
 		OnAllWavesCompleted.Broadcast();
 		return; 
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Starting Wave %d"), CurrentWaveIndex + 1);
-
 	FWaveData waveData = Waves[CurrentWaveIndex];
 	CurrentWaveEnemyCount = waveData.EnemyCount;
 	EnemiesSpawned = 0;
@@ -65,7 +63,6 @@ void ASpawnSystem::SpawnEnemy()
 
 	if (SpawnedEnemy)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Spawning Enemy %d of Wave %d"), EnemiesSpawned + 1, CurrentWaveIndex + 1);
 		SpawnedEnemy->OnDestroyed.AddDynamic(this, &ASpawnSystem::OnEnemyDestroyed);
 		EnemiesSpawned++; 
 	}
@@ -77,7 +74,6 @@ void ASpawnSystem::OnEnemyDestroyed(AActor* DestroyedEnemy)
 	if (CurrentWaveEnemyCount <= 0 && EnemiesSpawned >= Waves[CurrentWaveIndex].EnemyCount)
 	{
 		GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
-		UE_LOG(LogTemp, Warning, TEXT("Wave %d completed"), CurrentWaveIndex + 1);
 		CurrentWaveIndex++;
 		OnWaveCompleted.Broadcast();
 		FTimerHandle TimerHandle;
