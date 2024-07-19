@@ -20,7 +20,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
+	float ElapsedTime = 0.0f;
 	virtual void Tick(float DeltaTime) override;
 
 };

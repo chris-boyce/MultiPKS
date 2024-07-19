@@ -24,13 +24,13 @@ void ABlackhole::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	float Radius = 500.0f; 
 	float Strength = 1000.0f; 
-	
+
 	TArray<FHitResult> HitResults;
 	FCollisionShape Sphere = FCollisionShape::MakeSphere(Radius);
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(GetOwner()); 
 	QueryParams.bReturnPhysicalMaterial = false;
-	
+
 	bool bResult = GetWorld()->SweepMultiByObjectType(
 		HitResults,
 		GetActorLocation(),
@@ -51,9 +51,16 @@ void ABlackhole::Tick(float DeltaTime)
 				if (MoveComp)
 				{
 					FVector PullDirection = (GetActorLocation() - Actor->GetActorLocation()).GetSafeNormal();
-					MoveComp->Velocity = PullDirection * Strength; 
+					FVector LaunchVelocity = PullDirection * Strength;
+					Cast<ACharacter>(Actor)->LaunchCharacter(LaunchVelocity, true, false); 
 				}
-				
+				ElapsedTime += DeltaTime;
+				if (ElapsedTime >= 1.0f)
+				{
+					IDamageable* DamageableActor = Cast<IDamageable>(Actor);
+					DamageableActor->DetailedTakeDamage2(10.0f, GetActorLocation(), FName("Null"));
+					ElapsedTime = 0.0f;  
+				}
 			}
 		}
 	}
